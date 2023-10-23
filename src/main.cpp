@@ -4,13 +4,13 @@
 
 void setup()
 {
-  
+  BoardInit();
 }
 
 void loop()
 {
   if (ROBUS_IsBumper(3))
   {
-    move(0.5, 50);
+    move(0.5, 250);
   }
 }

@@ -19,9 +19,9 @@
   #define KD 0.005
 #else
     #ifdef ROBOT_A
-      #define KP 2.25
-      #define KI 0.01
-      #define KD 0.005
+      #define KP 0.005
+      #define KI 0.001
+      #define KD 0.01
     #endif
 #endif
 
@@ -39,7 +39,8 @@ extern float rightMotorIntegral;
 extern unsigned long previousTime;
 
 void move(float motorSpeed, int distance_cm);
-void adjustMotorsSpeed(float expectedLeftSpeed_pulses, float expectedRightSpeed_pulses);
+void PID(int weakerMotor, int motorID, float speed);
+void adjustMotorsSpeed(float leftMotorSpeed, float rightMotorSpeed, float expectedLeftSpeed_pulses, float expectedRightSpeed_pulses);
 void stop();
 void resetEncoders();
 #endif

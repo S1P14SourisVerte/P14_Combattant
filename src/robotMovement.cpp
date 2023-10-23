@@ -42,10 +42,38 @@ void move(float motorSpeed, int distance_cm)
 
     float expectedLeftPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
     float expectedRightPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
-    adjustMotorsSpeed(motorSpeed, motorSpeed, expectedLeftPulses, expectedRightPulses);
+    
+    // adjustMotorsSpeed(motorSpeed, motorSpeed, expectedLeftPulses, expectedRightPulses);
+    adjustMotorsSpeed(motorSpeed, motorSpeed, (float)ENCODER_Read(RIGHT_MOTOR), (float)ENCODER_Read(RIGHT_MOTOR));
+    // PID(RIGHT_MOTOR, LEFT_MOTOR, motorSpeed);
   }
   stop();
 }
+
+// void PID(int weakerMotor, int motorID, float speed) {
+//   unsigned long currentTime = millis();
+//   double timeChange = (double)(currentTime - previousTime) / 1000.0f;
+
+//   float input = ENCODER_Read(motorID);
+//   float lastErr = 0;
+//   float output = 0;
+
+//   double error = ENCODER_Read(weakerMotor) - input;
+//   leftMotorIntegral += (error * timeChange);
+//   double dErr = (error - lastErr) / timeChange;
+
+//   output = KP * error + KI * leftMotorIntegral + KD * dErr;
+//   Serial.println(output);
+
+//   output = constrain(output, -1, 1);
+
+//   MOTOR_SetSpeed(motorID, output);
+//   MOTOR_SetSpeed(RIGHT_MOTOR, speed);
+
+//   lastErr = error;
+//   previousTime = currentTime;
+//   delay(10);
+// }
 
 float getAccelerationSpeed(float motorMaxSpeed)
 {
@@ -63,33 +91,67 @@ void adjustMotorsSpeed(float leftMotorSpeed, float rightMotorSpeed, float expect
   float currentLeftSpeed_pulses = ENCODER_Read(LEFT_MOTOR);
   float currentRightSpeed_pulses = ENCODER_Read(RIGHT_MOTOR);
 
-  unsigned long currentTime_sec = millis();
-  double timeDifference = (currentTime_sec - previousTime) / 1000.0f;
+  unsigned long currentTime = millis();
+  double timeDifference_sec = (currentTime - previousTime) / 1000.0f;
 
   float leftMotorError = expectedLeftSpeed_pulses - currentLeftSpeed_pulses;
-  float rightMotorError = expectedRightSpeed_pulses - currentRightSpeed_pulses;
+  // float rightMotorError = expectedRightSpeed_pulses - currentRightSpeed_pulses;
+  // Serial.print("ELP: ");
+  // Serial.print(expectedLeftSpeed_pulses);
+  // Serial.print(", ERP: ");
+  // Serial.print(expectedRightSpeed_pulses);
+  // Serial.print(", LP: ");
+  // Serial.print(currentLeftSpeed_pulses);
+  // Serial.print(", RP: ");
+  // Serial.print(currentRightSpeed_pulses);
 
-  leftMotorIntegral += leftMotorError * timeDifference;
-  rightMotorIntegral += rightMotorError * timeDifference;
+  leftMotorIntegral += leftMotorError;// * timeDifference_sec;
+  
+  // rightMotorIntegral += rightMotorError * timeDifference_sec;
 
-  float leftMotorDerivative = (leftMotorError - leftMotorPrevErr) / timeDifference;
-  float rightMotorDerivative = (rightMotorError - rightMotorPrevErr) / timeDifference;
+  float leftMotorDerivative = (leftMotorError - leftMotorPrevErr);// / timeDifference_sec;
+  // float rightMotorDerivative = (rightMotorError - rightMotorPrevErr) / timeDifference_sec;
 
   float adjustedLeftMotorPulsesCount = (KP * leftMotorError) + (KI * leftMotorIntegral) + (KD * leftMotorDerivative);
-  float adjustedRightMotorPulsesCount = (KP * rightMotorError) + (KI * rightMotorIntegral) + (KD * rightMotorDerivative);
+  // float adjustedRightMotorPulsesCount = (KP * rightMotorError) + (KI * rightMotorIntegral) + (KD * rightMotorDerivative);
 
-  float leftMotorPulsesModifier = adjustedLeftMotorPulsesCount / expectedLeftSpeed_pulses;
-  float rightMotorPulsesModifier = adjustedRightMotorPulsesCount / expectedRightSpeed_pulses;
+  // Serial.print(", ERR: ");
+  // Serial.print(KP * leftMotorError);
+  // Serial.print(", INT: ");
+  // Serial.print(KI * leftMotorIntegral);
+  // Serial.print(", DER: ");
+  // Serial.println(KD * leftMotorDerivative);
+
+  float leftMotorPulsesModifier = adjustedLeftMotorPulsesCount * expectedLeftSpeed_pulses;
+  // float rightMotorPulsesModifier = adjustedRightMotorPulsesCount / expectedRightSpeed_pulses;
+
+  // Serial.print(", LS: ");
+  // Serial.print(leftMotorSpeed);
+  // Serial.print(", RS: ");
+  // Serial.print(rightMotorSpeed);
+
+  // Serial.print("LNS: ");
+  // Serial.print(leftMotorSpeed * leftMotorPulsesModifier);
+  // Serial.print(", RNS: ");
+  // Serial.println(rightMotorSpeed * rightMotorPulsesModifier);
+
+  // Serial.print("ERR: ");
+  // Serial.print(leftMotorError);
+  // Serial.print(", INT: ");
+  // Serial.print(leftMotorIntegral);
+  // Serial.print(", DER: ");
+  // Serial.print(leftMotorDerivative);
+  // Serial.print(", MOD: ");
+  // Serial.println(leftMotorPulsesModifier);
 
   MOTOR_SetSpeed(LEFT_MOTOR, leftMotorSpeed * leftMotorPulsesModifier);
-  MOTOR_SetSpeed(RIGHT_MOTOR, rightMotorSpeed * rightMotorPulsesModifier);
+  MOTOR_SetSpeed(RIGHT_MOTOR, rightMotorSpeed);
 
   leftMotorPrevErr = leftMotorError;
-  rightMotorPrevErr = rightMotorError;
-  previousTime = currentTime_sec;
+  // rightMotorPrevErr = rightMotorError;
+  previousTime = currentTime;
+  delay(10);
 }
-
-
 
 void stop()
 {
