@@ -21,4 +21,4 @@ jobs:
         author_email: robot@example.com
         message: 'Committing clang-format changes'
       env:
-        GITHUB_TOKEN: ${{ secrets.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 }}
+        GITHUB_TOKEN: ${{ secrets.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 }}
