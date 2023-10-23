@@ -4,7 +4,7 @@
 #define PI 3.14159265359
 #define Wheel_Circumference 22.86
 #define Foot_To_Centimeter 30.48
-#define Distance_Between_Wheels 19
+#define Distance_Between_Wheels 19.0
 
 // PROTOTYPE DE FONCTION
 int Floor_Color();
@@ -26,7 +26,7 @@ int Turn_DF() {
   int pulse_droite;
   int pulse_gauche;
 
-// SI LA COULEUR DETECTÉ EST 
+// SI LA COULEUR DETECTÉ EST VERT
   if (Floor_Color() == 0) {
     // TROUVER LE RAYON À FAIRE
     radius_little = Foot_To_Centimeter + ((Foot_To_Centimeter/2) - (Distance_Between_Wheels/2));
@@ -41,6 +41,8 @@ int Turn_DF() {
     pulse_gauche = ((distance_big / Wheel_Circumference) * 3200);
   }
   
+  
+  // SI LA COULEUR DÉTECTÉ EST JAUNE
   else if (Floor_Color() == 1) {
     // TROUVER LE RAYON À FAIRE
     radius_little = 2* Foot_To_Centimeter + ((Foot_To_Centimeter/2) - (Distance_Between_Wheels/2));
@@ -55,10 +57,6 @@ int Turn_DF() {
     pulse_gauche = ((distance_big / Wheel_Circumference) * 3200);
   }
 
-  else {
-    printf("SALUT");
-  }
-
   int pulse_reel_gauche;
   int pulse_reel_droite;
 
@@ -68,23 +66,24 @@ int Turn_DF() {
   while ((pulse_reel_gauche < pulse_gauche) && (pulse_reel_droite < pulse_droite))
   {
     MOTOR_SetSpeed(0, (0.20));
-    MOTOR_SetSpeed(1, (0.20 * (distance_little/distance_big)));
+    MOTOR_SetSpeed(1, (1.07* 0.20 * (distance_little/distance_big)));
 
   pulse_reel_gauche = ENCODER_Read(0);
   pulse_reel_droite = ENCODER_Read(1);
   }
 
   MOTOR_SetSpeed(0,0);
-  MOTOR_SetSpeed(0,0);
+  MOTOR_SetSpeed(1,0);
 
+  ENCODER_Reset(0);
+  ENCODER_Reset(1);
 }
 
   // ON RENTRE DANS LA BOUCLE WHILE POUR REGARDER LE NB DE PULSES
 
-
-
 void setup() {
   BoardInit();
+  Serial.begin(9600);
 }
 
 void loop() {
