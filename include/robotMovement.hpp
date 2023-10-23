@@ -1,6 +1,9 @@
 #pragma once
 #ifndef _ROBOTMOVEMENT_HPP_
 #define _ROBOTMOVEMENT_HPP_
+
+#include <math.h>
+
 #include <LibRobus.h>
 
 #define LEFT_MOTOR 0
