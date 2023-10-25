@@ -19,9 +19,12 @@
   #define KD 0.005
 #else
     #ifdef ROBOT_A
-      #define KP 0.005
-      #define KI 0.001
-      #define KD 0.01
+      // #define KP 0.01
+      // #define KI 0.1
+      // #define KD 0.1
+      #define KP 0.08
+      #define KI 3.0
+      #define KD 0.2
     #endif
 #endif
 
