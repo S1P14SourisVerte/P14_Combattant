@@ -15,6 +15,8 @@ void loop()
 {
   if(ROBUS_IsBumper(3))
   {
-    move(0.5, 500);
+    // move(0.5, 500);
+    turnSmooth();
+    exit(EXIT_SUCCESS);
   }
 }

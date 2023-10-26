@@ -38,7 +38,7 @@ extern float rightMotorIntegral;
 extern unsigned long previousTime;
 
 void move(float motorSpeed, int distance_cm);
-void adjustMotorsSpeed(float leftMotorSpeed, float rightMotorSpeed, float expectedLeftSpeed_pulses, float expectedRightSpeed_pulses);
+void turnSmooth();
 void stop();
 void resetEncoders();
 #endif

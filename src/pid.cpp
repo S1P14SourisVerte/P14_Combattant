@@ -41,7 +41,11 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   float ud;
   float ui;
 
-  error = ENCODER_Read(RIGHT_MOTOR) - ENCODER_Read(LEFT_MOTOR);
+  float errorFactor = expectedRightMotorPulses - expectedLeftMotorPulses;
+  error = errorFactor - (ENCODER_Read(RIGHT_MOTOR) - ENCODER_Read(LEFT_MOTOR));
+
+
+
   up = pidParams.Kp * error;
   derivatedError = (error - oldError) / timeDifference_sec;
   oldError = error;
@@ -64,19 +68,19 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   previousTime = millis() - currentTime;
 
 #ifdef DEBUG
-  Serial.print("Encodeur gauche ");
-  Serial.print(ENCODER_Read(LEFT_MOTOR));
-  Serial.print(" Encodeur droit ");
-  Serial.print(ENCODER_Read(RIGHT_MOTOR));
+  // Serial.print("Encodeur gauche ");
+  // Serial.print(ENCODER_Read(LEFT_MOTOR));
+  // Serial.print(" Encodeur droit ");
+  // Serial.print(ENCODER_Read(RIGHT_MOTOR));
   Serial.print(" Vitesse ");
   Serial.print(adjustedLeftSpeed);
-  Serial.print("      u ");
+  Serial.print(" u ");
   Serial.print(u);
-  Serial.print("    ui ");
+  Serial.print(" ui ");
   Serial.print(ui);
-  Serial.print("    up ");
+  Serial.print(" up ");
   Serial.print(up);
-  Serial.print("    ud ");
+  Serial.print(" ud ");
   Serial.println(ud);
 #endif
 
