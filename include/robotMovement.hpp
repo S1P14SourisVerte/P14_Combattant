@@ -3,7 +3,6 @@
 #define _ROBOTMOVEMENT_HPP_
 
 #include <math.h>
-
 #include <LibRobus.h>
 
 #define LEFT_MOTOR 0
@@ -19,12 +18,9 @@
   #define KD 0.005
 #else
     #ifdef ROBOT_A
-      // #define KP 0.01
-      // #define KI 0.1
-      // #define KD 0.1
-      #define KP 0.08
-      #define KI 3.0
-      #define KD 0.2
+      #define KP 0.0005
+      #define KI 0.00000002
+      #define KD 2.0
     #endif
 #endif
 
@@ -42,7 +38,6 @@ extern float rightMotorIntegral;
 extern unsigned long previousTime;
 
 void move(float motorSpeed, int distance_cm);
-void PID(int weakerMotor, int motorID, float speed);
 void adjustMotorsSpeed(float leftMotorSpeed, float rightMotorSpeed, float expectedLeftSpeed_pulses, float expectedRightSpeed_pulses);
 void stop();
 void resetEncoders();
