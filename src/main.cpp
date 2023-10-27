@@ -5,6 +5,12 @@
 #define Wheel_Circumference 22.86
 #define Foot_To_Centimeter 30.48
 #define Distance_Between_Wheels 19.0
+<<<<<<< Updated upstream
+=======
+#define redPin 3
+#define greenPin 5
+#define bluePin 6
+>>>>>>> Stashed changes
 
 // PROTOTYPE DE FONCTION
 int Floor_Color();
@@ -101,6 +107,7 @@ void loop() {
 // Étape 4: Tourne jusqu'à temps d'atteindre le nb de pulses
 // Étape 5: Avancer tout droit jusqu'à temps de voir une couleur => Quand voit une couleur tourne comme à l'étape 3 et 4
 
+<<<<<<< Updated upstream
 
 // POUR LE TOURNANT => Nb de pulses différent en fonction de la couleur => SI VERT => nb de pulse 1 / SI JAUNE => nb de pulse 2
 
@@ -134,3 +141,5 @@ void loop() {
 
 
 //
+=======
+>>>>>>> Stashed changes

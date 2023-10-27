@@ -1,0 +1,88 @@
+#include <Wire.h>
+#include "Adafruit_TCS34725.h"
+
+// Choix des outputs pour chaque couleur (pin 3 => rouge )
+#define redpin 3
+#define greenpin 5
+#define bluepin 6
+
+// for a common anode LED, connect the common pin to +5V
+// for common cathode, connect the common to ground
+
+// Mis à faux si on utilise pas la LED
+#define commonAnode true
+
+// TABLE RGB
+byte gammatable[256];
+
+
+Adafruit_TCS34725 tcs = Adafruit_TCS34725(TCS34725_INTEGRATIONTIME_50MS, TCS34725_GAIN_4X);
+
+void setup() {
+    Serial.begin(9600);
+
+    if (tcs.begin()) {
+        Serial.println("Found sensor");
+    } else {
+        Serial.println("No TCS34725 found ... check your connections");
+        while (1); 
+    }
+
+    // use these three pins to drive an LED
+    pinMode(redpin, OUTPUT);
+    pinMode(greenpin, OUTPUT);
+    pinMode(bluepin, OUTPUT);
+
+    // Conversion de RGB à ce que l'on voit nous
+    for (int i = 0; i < 256; i++) {
+        float x = i;
+        x /= 255;
+        x = pow(x, 2.5);
+        x *= 255;
+
+        if (commonAnode) {
+            gammatable[i] = 255 - x;
+        } else {
+            gammatable[i] = x;
+        }
+    }
+}
+
+
+void loop() {
+    uint16_t clear, red, green, blue;
+
+// LED s'allume
+    tcs.setInterrupt(false);
+
+// Delay pour lire la couleur
+    delay(60); 
+
+// Ramasse les datas
+    tcs.getRawData(&red, &green, &blue, &clear);
+
+    tcs.setInterrupt(true);  // turn off LED
+
+    Serial.print("C:\t"); Serial.print(clear);
+    Serial.print("\tR:\t"); Serial.print(red);
+    Serial.print("\tG:\t"); Serial.print(green);
+    Serial.print("\tB:\t"); Serial.print(blue);
+
+    // HEX Code
+    uint32_t sum = clear;
+    float r, g, b;
+    r = red; r /= sum;
+    g = green; g /= sum;
+    b = blue; b /= sum;
+    r *= 256; g *= 256; b *= 256;
+    Serial.print("\t");
+    Serial.print((int)r, HEX); Serial.print((int)g, HEX); Serial.print((int)b, HEX);
+    Serial.println();
+
+    // ÉCRIT LES DONNÉES DE RGB dans les pins associés (écrites en haut)
+
+    analogWrite(redpin, gammatable[(int)r]);
+    analogWrite(greenpin, gammatable[(int)g]);
+    analogWrite(bluepin, gammatable[(int)b]);
+}
+
