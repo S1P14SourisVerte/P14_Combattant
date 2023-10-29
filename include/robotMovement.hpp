@@ -12,18 +12,6 @@
 #define SELF_TURN_CIRCONFERENCE_CM 60.65f
 #define PULSES_PER_WHEEL_CYCLE 3200.0f
 
-#ifdef ROBOT_B
-  #define KP 2.25
-  #define KI 0.01
-  #define KD 0.005
-#else
-    #ifdef ROBOT_A
-      #define KP 0.0005
-      #define KI 0.00000002
-      #define KD 2.0
-    #endif
-#endif
-
 typedef enum {
     RightTurn = 1,
     LeftTurn = -1 
@@ -37,8 +25,9 @@ extern float rightMotorIntegral;
 
 extern unsigned long previousTime;
 
+void initializeAccelerationParams(float maxSpeed, float baseSpeed = 0.1, float accelerationSpeed = 1);
 void move(float motorSpeed, int distance_cm);
-void turnSmooth();
+float getAcceleration(unsigned int startTime);
 void stop();
 void resetEncoders();
 #endif

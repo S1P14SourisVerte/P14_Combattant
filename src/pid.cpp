@@ -3,12 +3,12 @@
 
 struct pidParameters
 {
-  float Kp = 0.0005;
-  float Ki = 0.00000008;
-  float Kd = 2.0;
-  float Alpha = 0.5;
-  float SaturationMax = 0.04;
-  float SaturationMin = -0.04;
+  float Kp = KP;
+  float Ki = KI;
+  float Kd = KD;
+  float Alpha = ALPHA;
+  float SaturationMax = SATURATION_MAX;
+  float SaturationMin = SATURATION_MIN;
 };
 
 pidParameters pidParams;
@@ -41,10 +41,12 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   float ud;
   float ui;
 
-  float errorFactor = expectedRightMotorPulses - expectedLeftMotorPulses;
-  error = errorFactor - (ENCODER_Read(RIGHT_MOTOR) - ENCODER_Read(LEFT_MOTOR));
-
-
+  // Modification du calcul de lerreur pour permettre eventuellement le support du PID en tournant
+  float errorFactor = expectedRightMotorPulses / expectedLeftMotorPulses;
+  int leftPulses = ENCODER_Read(LEFT_MOTOR);
+  int rightPulses = ENCODER_Read(RIGHT_MOTOR);
+  float currentErrorFactor = (float)(rightPulses / leftPulses);
+  error = leftPulses * (currentErrorFactor - errorFactor);
 
   up = pidParams.Kp * error;
   derivatedError = (error - oldError) / timeDifference_sec;
@@ -68,10 +70,10 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   previousTime = millis() - currentTime;
 
 #ifdef DEBUG
-  // Serial.print("Encodeur gauche ");
-  // Serial.print(ENCODER_Read(LEFT_MOTOR));
-  // Serial.print(" Encodeur droit ");
-  // Serial.print(ENCODER_Read(RIGHT_MOTOR));
+  Serial.print("Encodeur gauche ");
+  Serial.print(ENCODER_Read(LEFT_MOTOR));
+  Serial.print(" Encodeur droit ");
+  Serial.print(ENCODER_Read(RIGHT_MOTOR));
   Serial.print(" Vitesse ");
   Serial.print(adjustedLeftSpeed);
   Serial.print(" u ");
@@ -83,6 +85,8 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   Serial.print(" ud ");
   Serial.println(ud);
 #endif
-
+  
+  // Le delais non bloquant fait passer le delta pulses de 10 a environ 100-120
+  // donc jutilise la fonction delay()
   delay(100);
 }
