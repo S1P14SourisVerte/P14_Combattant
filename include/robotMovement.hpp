@@ -25,9 +25,9 @@ extern float rightMotorIntegral;
 
 extern unsigned long previousTime;
 
-void initializeAccelerationParams(float maxSpeed, float baseSpeed = 0.1, float accelerationSpeed = 1);
-void move(float motorSpeed, int distance_cm);
-float getAcceleration(unsigned int startTime);
+void initializeAccelerationParams(float maxSpeed, float baseSpeed = 0.1, float accelerationSpeed = 1, float horizontalOffset = 0, float verticalOffset = 0);
+void move(float motorSpeed, int distance_cm, bool hasDeceleration = false);
+float getAcceleration(unsigned int startTime, bool isAcceleration = true);
 void stop();
 void resetEncoders();
 #endif

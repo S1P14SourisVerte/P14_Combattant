@@ -6,25 +6,29 @@ struct accelerationParameters
   float baseSpeed = 0.1;
   float accelerationSpeed = 1;
   float maxSpeed = 1;
+  float horizontalOffset = 0;
+  float verticalOffset = 0;
 };
 
 accelerationParameters accParams;
 
-void initializeAccelerationParams(float maxSpeed, float baseSpeed = 0.1, float accelerationSpeed = 1)
+void initializeAccelerationParams(float maxSpeed, float baseSpeed, float accelerationSpeed, float horizontalOffset, float verticalOffset)
 {
   accParams.maxSpeed = maxSpeed;
   accParams.baseSpeed = baseSpeed;
   accParams.accelerationSpeed = accelerationSpeed;
+  accParams.horizontalOffset = horizontalOffset;
+  accParams.verticalOffset = verticalOffset;
 }
 
-void move(float motorSpeed, int distance_cm)
+void move(float motorSpeed, int distance_cm, bool hasDeceleration)
 {
   resetEncoders();
   float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
   float motorAccelerationSpeed = accParams.baseSpeed;
   
   initializeAccelerationParams(motorSpeed);
-  static unsigned int startTime = millis();
+  static unsigned int startAccTime = millis();
 
   MOTOR_SetSpeed(LEFT_MOTOR, motorAccelerationSpeed);
   MOTOR_SetSpeed(RIGHT_MOTOR, motorAccelerationSpeed);
@@ -34,24 +38,55 @@ void move(float motorSpeed, int distance_cm)
 
   while ((float)ENCODER_Read(LEFT_MOTOR) <= expectedLeftPulses)
   {
-    motorAccelerationSpeed = getAcceleration(startTime);
+    if (((float)ENCODER_Read(LEFT_MOTOR) / expectedLeftPulses) < 0.9)
+    {
+      motorAccelerationSpeed = getAcceleration(startAccTime);
+    }
+    else if (hasDeceleration)
+    {
+      static unsigned int startDeccTime = millis();
+      motorAccelerationSpeed = getAcceleration(startDeccTime, false);
+    }
+    
     pid(motorAccelerationSpeed, motorAccelerationSpeed, expectedLeftPulses, expectedRightPulses);
   }
   stop();
 }
 
-float getAcceleration(unsigned int startTime)
+float getAcceleration(unsigned int startTime, bool isAcceleration)
 {
   unsigned int currentTime = millis();
 
+  float maxSpeed = accParams.maxSpeed;
+  float baseSpeed = accParams.baseSpeed;
+  float accelerationSpeed = accParams.accelerationSpeed;
+
   // Voir https://www.desmos.com/calculator/nu9zyg5lji
   float outputSpeed = 
-    accParams.maxSpeed / 
-    (1 + ((accParams.maxSpeed - accParams.baseSpeed) / accParams.baseSpeed) * 
-      exp(-accParams.accelerationSpeed * ((currentTime - startTime) * (accParams.accelerationSpeed * 0.003)))
+    maxSpeed / 
+    (1 + ((maxSpeed - baseSpeed) / baseSpeed) * 
+      exp(-accelerationSpeed * ((currentTime - startTime) * (accelerationSpeed * 0.003)))
     );
 
   outputSpeed = constrain(outputSpeed, -1, 1);
+
+  if (!isAcceleration)
+  {
+    outputSpeed = maxSpeed - outputSpeed;
+  }
+
+  if (outputSpeed > -0.1 && outputSpeed < 0.1)
+  {
+    if (outputSpeed < 0)
+    {
+      outputSpeed = -0.1;
+    }
+    else
+    {
+      outputSpeed = 0.1;
+    }
+  }
+
   return outputSpeed;
 }
 

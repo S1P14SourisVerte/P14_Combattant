@@ -70,11 +70,11 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   previousTime = millis() - currentTime;
 
 #ifdef DEBUG
-  Serial.print("Encodeur gauche ");
+  Serial.print(" e_g ");
   Serial.print(ENCODER_Read(LEFT_MOTOR));
-  Serial.print(" Encodeur droit ");
+  Serial.print(" e_d ");
   Serial.print(ENCODER_Read(RIGHT_MOTOR));
-  Serial.print(" Vitesse ");
+  Serial.print(" v ");
   Serial.print(adjustedLeftSpeed);
   Serial.print(" u ");
   Serial.print(u);
