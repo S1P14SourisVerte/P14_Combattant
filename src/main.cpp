@@ -13,7 +13,7 @@ void loop()
   if(ROBUS_IsBumper(3))
   {
     // move(0.5, 500);
-    move(0.5, 250, true);
+    move(1, 250, true, true);
     exit(EXIT_SUCCESS);
   }
 }

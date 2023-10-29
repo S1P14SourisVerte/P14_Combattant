@@ -6,26 +6,47 @@ struct accelerationParameters
   float baseSpeed = 0.1;
   float accelerationSpeed = 1;
   float maxSpeed = 1;
+  float decelerationThreshold = 1;
   float horizontalOffset = 0;
   float verticalOffset = 0;
 };
 
 accelerationParameters accParams;
 
-void initializeAccelerationParams(float maxSpeed, float baseSpeed, float accelerationSpeed, float horizontalOffset, float verticalOffset)
+void initializeAccelerationParams(float maxSpeed, 
+                                  float baseSpeed, 
+                                  float accelerationSpeed,
+                                  float horizontalOffset, 
+                                  float verticalOffset)
 {
   accParams.maxSpeed = maxSpeed;
   accParams.baseSpeed = baseSpeed;
   accParams.accelerationSpeed = accelerationSpeed;
   accParams.horizontalOffset = horizontalOffset;
   accParams.verticalOffset = verticalOffset;
+
+  if (maxSpeed <= 0.3) {
+    accParams.decelerationThreshold = 0.975;
+  } else if (maxSpeed <= 0.4) {
+    accParams.decelerationThreshold = 0.95;
+  } else if (maxSpeed <= 0.5) {
+    accParams.decelerationThreshold = 0.925;
+  } else if (maxSpeed <= 0.65) {
+    accParams.decelerationThreshold = 0.875;
+  } else if (maxSpeed <= 0.75) {
+    accParams.decelerationThreshold = 0.825;
+  } else if (maxSpeed <= 0.85) {
+    accParams.decelerationThreshold = 0.775;
+  } else {
+    accParams.decelerationThreshold = 0.725;
+  }
 }
 
-void move(float motorSpeed, int distance_cm, bool hasDeceleration)
+void move(float motorSpeed, int distance_cm, bool hasAcceleration, bool hasDeceleration)
 {
   resetEncoders();
   float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
-  float motorAccelerationSpeed = accParams.baseSpeed;
+  float motorAccelerationSpeed = hasAcceleration ? accParams.baseSpeed : motorSpeed;
   
   initializeAccelerationParams(motorSpeed);
   static unsigned int startAccTime = millis();
@@ -38,9 +59,12 @@ void move(float motorSpeed, int distance_cm, bool hasDeceleration)
 
   while ((float)ENCODER_Read(LEFT_MOTOR) <= expectedLeftPulses)
   {
-    if (((float)ENCODER_Read(LEFT_MOTOR) / expectedLeftPulses) < 0.9)
+    if (((float)ENCODER_Read(LEFT_MOTOR) / expectedLeftPulses) < accParams.decelerationThreshold)
     {
-      motorAccelerationSpeed = getAcceleration(startAccTime);
+      if (hasAcceleration)
+      {
+        motorAccelerationSpeed = getAcceleration(startAccTime);
+      }
     }
     else if (hasDeceleration)
     {
