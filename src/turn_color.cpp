@@ -3,10 +3,14 @@
 #include <Arduino.h>
 #include <Librobus.h>
 
-#define PI 3.14159265359
 #define Wheel_Circumference 22.86
 #define Foot_To_Centimeter 30.48
 #define Distance_Between_Wheels 19.0
+#define motor_SetSpeed 0.10
+
+// POUR QUE LA FONCTION SUIVEUR DE LIGNE FONCTIONNE => Définition de la couleur de départ
+
+char Start_Color = 'V';
 
 // Fonction pour la COULEUR
 
@@ -42,11 +46,12 @@ char Floor_Color() {
   }
 
   colorSensor.clearInterrupt();
+  return 'E';
 }
 
 // Fonction pour TOURNER
 
-int Turn_DF() {
+void Turn_DF() {
   float radius_little;
   float radius_big;
   float distance_little;
@@ -106,27 +111,173 @@ int Turn_DF() {
   ENCODER_Reset(1);
 }
 
-
-
-
-// Fonction pour détecter avec le capteur IR
-void SensorIR(){
-
-
+// Fonction pour tourner les deux roues
+ 
+void Turn_2_Wheel(float speed, float angle, int direction) {
+ 
+  float ratio_p_a;
+  float ratio_a_c;
+  float circonferenceTrajectory = 23.88;
+  float circonferenceWheel = 9.4247;
+  float pulses;
+  float LeftPulses;
+  float RightPulses;
+  float pulsesDifference;
+  float newSpeedLeft;
+  float newSpeedRight;
+ 
+  ratio_a_c = (angle / 360) * circonferenceTrajectory;
+  ratio_p_a = (ratio_a_c / circonferenceWheel);
+  pulses = (ratio_p_a * 3200);
+ 
+  // Encoder variable
+ 
+  LeftPulses = (float)abs(ENCODER_Read(0));
+  RightPulses = (float)abs(ENCODER_Read(1));
+ 
+  if (direction == 0) {
+    while (LeftPulses < pulses)
+    {
+ 
+      MOTOR_SetSpeed(0, 0.98*speed);
+      MOTOR_SetSpeed(1, -speed);
+      LeftPulses = (float)abs(ENCODER_Read(0));
+      RightPulses = (float)abs(ENCODER_Read(1));
+ 
+    }
+ 
+    LeftPulses = (float)abs(ENCODER_Read(0));
+    RightPulses = (float)abs(ENCODER_Read(1));
+ 
+    while (LeftPulses >= RightPulses)
+ 
+    {
+      RightPulses = (float)abs(ENCODER_Read(1));
+      MOTOR_SetSpeed(0, 0);
+      MOTOR_SetSpeed(1, -0.01);
+      RightPulses = (float)abs(ENCODER_Read(1));
+    }
+ 
+    MOTOR_SetSpeed(1, 0);
+ 
+  } else
+ 
+    while ((pulses >= LeftPulses) && (pulses >= RightPulses)) {
+ 
+      LeftPulses = (float)ENCODER_Read(0);
+      RightPulses = (float)ENCODER_Read(1);
+      pulsesDifference = LeftPulses - RightPulses;
+      newSpeedLeft = speed - (0.0005 * pulsesDifference);
+      newSpeedRight= speed + (0.0001 * pulsesDifference);
+ 
+      MOTOR_SetSpeed(0, -1*newSpeedLeft);
+      MOTOR_SetSpeed(1, newSpeedRight);
+ 
+      LeftPulses = (float)ENCODER_Read(0);
+      RightPulses = (float)ENCODER_Read(1);
+ 
+    }
+ 
+  MOTOR_SetSpeed(0, 0);
+  MOTOR_SetSpeed(1, 0);
+  ENCODER_Reset(0);
+  ENCODER_Reset(1);
+ 
 }
+
+// Fonction pour le suiveur de ligne
+
+void Detect_Line() {
+  
+  // Si couleur qu'on était est verte
+  if (Start_Color == 'V')
+    {
+    
+    // Capteur Gauche => A1
+    // Capteur Centre => A2
+    // Capteur Droit => A3
+
+    if (analogRead(A1) > 5)
+    {
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+  
+    if (analogRead(A2) > 5)
+    {
+      MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
+    }
+  
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+  
+    Turn_2_Wheel(0.10, 45, 0);
+  
+    MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+    MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+  
+   }
+  
+  //  // Si couleur qu'on était est jaune
+  //  else if (Floor_Color() == 'J') 
+  //  {
+  //   while (CapteurD > 5)
+  //   {
+  //     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+  //     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+  
+  //     delay(100);
+  
+  //     MOTOR_SetSpeed(LEFT, 0);
+  //     MOTOR_SetSpeed(RIGHT, 0);
+  
+  //     Turn_2_Wheel(0.10, 65, 0);
+  
+  //     delay(100);
+  
+  //     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+  //     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+  //   }
+  //   while (CapteurC > 5)
+  //   {
+  //     MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
+  //     MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
+  //   }
+  
+  //   MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+  //   MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+  //   float CapteurG = analogRead(A1);
+  //   float CapteurC = analogRead(A2);
+  //   float CapteurD = analogRead(A3);
+  
+    
+  // }
+  
+}
+
+
+
+
 
 
 
 void setup() {
-  // POUR LE TURN
-  BoardInit();
-  Serial.begin(9600);
+// POUR LE TURN
+BoardInit();
+Serial.begin(9600);
 
   // POUR LA COULEUR
-  Wire.begin();
+Wire.begin();
+
+// POUR LE SUIVEUR DE LIGNE
+pinMode(A1, INPUT);
+pinMode(A2, INPUT);
+pinMode(A3, INPUT);
 }
 
 void loop() {
-  Serial.println(Floor_Color());
+
+  Detect_Line();
   
 }
