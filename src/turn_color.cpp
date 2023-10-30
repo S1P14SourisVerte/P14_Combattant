@@ -274,10 +274,7 @@ void Detect_Line() {
     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
    }
-  
 }
-
-
 
 void setup() {
 // POUR LE TURN
