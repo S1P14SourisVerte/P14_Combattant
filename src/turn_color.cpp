@@ -197,68 +197,85 @@ void Detect_Line() {
     // Capteur Centre => A2
     // Capteur Droit => A3
 
-    if (analogRead(A1) > 5)
+    while (analogRead(A1) > 5)
     {
       MOTOR_SetSpeed(LEFT, motor_SetSpeed);
       MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
     }
+
+    delay(100);
+
+    MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
+    MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
   
-    if (analogRead(A2) > 5)
+    while (analogRead(A2) > 5)
     {
       MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
       MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
     }
+
+    delay(50);
   
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
+
+    delay(100);
   
     Turn_2_Wheel(0.10, 45, 0);
+
+    delay(100);
   
     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
-  
    }
   
-  //  // Si couleur qu'on était est jaune
-  //  else if (Floor_Color() == 'J') 
-  //  {
-  //   while (CapteurD > 5)
-  //   {
-  //     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
-  //     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+   // Si couleur qu'on était est jaune
+   else if (Floor_Color() == 'J') 
+   {
+
+    MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+    MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
   
-  //     delay(100);
+    delay(1000);
+
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    Turn_2_Wheel(motor_SetSpeed, 90, 0);
+
+    while (analogRead(A3) > 5)
+    {
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    delay(100);
+
+    MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
+    MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
   
-  //     MOTOR_SetSpeed(LEFT, 0);
-  //     MOTOR_SetSpeed(RIGHT, 0);
+    while (analogRead(A2) > 5)
+    {
+      MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
+    }
+
+    delay(50);
   
-  //     Turn_2_Wheel(0.10, 65, 0);
+    MOTOR_SetSpeed(LEFT, 0);
+    MOTOR_SetSpeed(RIGHT, 0);
+
+    delay(100);
   
-  //     delay(100);
+    Turn_2_Wheel(0.10, 45, 0);
+
+    delay(100);
   
-  //     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
-  //     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
-  //   }
-  //   while (CapteurC > 5)
-  //   {
-  //     MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
-  //     MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
-  //   }
-  
-  //   MOTOR_SetSpeed(LEFT, motor_SetSpeed);
-  //   MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
-  //   float CapteurG = analogRead(A1);
-  //   float CapteurC = analogRead(A2);
-  //   float CapteurD = analogRead(A3);
-  
-    
-  // }
+    MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+    MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+   }
   
 }
-
-
-
-
 
 
 
