@@ -1,14 +1,20 @@
 #include "robotServo.hpp"
 
+bool drop;
+
 void setup() 
 {
   BoardInit();
   servoInit();
+  drop = false;
 }
 
 void loop() 
 {
- servoRotate(backServo);
- delay(2000);
- servoRotate(frontServo);
+  if(drop == false) {
+    dropCup();
+    resetServo();
+    drop = true;
+  }
+  // sweepCup();
 }

@@ -4,12 +4,10 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 
-extern MegaServo backServo;
-extern MegaServo frontServo;
-
-extern int backServoAngle;
-extern int frontServoAngle;
+#define BASE_ANGLE 40
 
 void servoInit(void);
-void servoRotate(MegaServo);
+void sweepCup(void);
+void dropCup(void);
+void resetServo(void);
 #endif
