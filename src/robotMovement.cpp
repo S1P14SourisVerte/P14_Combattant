@@ -125,3 +125,61 @@ void resetEncoders()
   ENCODER_ReadReset(LEFT_MOTOR);
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
+
+void turnSmooth(float motorSpeed)
+{
+  float radius_little;
+  float radius_big;
+  float distance_little;
+  float distance_big;
+  int expectedRightPulses;
+  int expectedLeftPulses;
+
+  char detectedColor = 'J';
+  int turnMultiplier = detectedColor == 'V' ? 1 : 2;
+  // char detectedColor = Floor_Color();
+
+  resetEncoders();
+
+  radius_little = 
+    (turnMultiplier * FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2);
+  radius_big = 
+    turnMultiplier * FOOT_TO_CENTIMETER + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
+
+  distance_little = (2 * PI * radius_little) / 4;
+  distance_big = (2 * PI * radius_big) / 4;
+
+  expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
+  expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
+
+  int pulse_reel_gauche;
+  int pulse_reel_droite;
+
+  pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
+  pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
+  
+  float leftMotorSpeed = motorSpeed;
+  float rightMotorSpeed = motorSpeed * (distance_little / distance_big);
+
+  MOTOR_SetSpeed(LEFT_MOTOR, leftMotorSpeed);
+  MOTOR_SetSpeed(RIGHT_MOTOR, rightMotorSpeed);
+
+  while ((float)ENCODER_Read(RIGHT_MOTOR) < expectedRightPulses)
+  {
+    pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
+    pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
+
+    pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
+
+    Serial.print("TPL: ");
+    Serial.print(expectedLeftPulses);
+    Serial.print(", TPR: ");
+    Serial.println(expectedRightPulses);
+    Serial.print(", CPL: ");
+    Serial.print(pulse_reel_gauche);
+    Serial.print(", CPR: ");
+    Serial.println(pulse_reel_droite);
+  }
+
+  stop();
+}

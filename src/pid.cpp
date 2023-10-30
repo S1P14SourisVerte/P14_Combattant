@@ -28,7 +28,7 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
 {
   float u;
   float adjustedLeftSpeed = leftMotorSpeed;
-  int error = 0;
+  float error = 0;
   float derivatedError = 0;
   float oldError = 0;
   float derivatedOldError = 0;
@@ -42,11 +42,28 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   float ui;
 
   // Modification du calcul de lerreur pour permettre eventuellement le support du PID en tournant
-  float errorFactor = expectedRightMotorPulses / expectedLeftMotorPulses;
-  int leftPulses = ENCODER_Read(LEFT_MOTOR);
-  int rightPulses = ENCODER_Read(RIGHT_MOTOR);
-  float currentErrorFactor = (float)(rightPulses / leftPulses);
+  float errorFactor = (float)expectedRightMotorPulses / (float)expectedLeftMotorPulses;
+  float leftPulses = ENCODER_Read(LEFT_MOTOR);
+  float rightPulses = ENCODER_Read(RIGHT_MOTOR);
+
+  if (leftPulses == 0 || rightPulses == 0)
+    return;
+
+  float currentErrorFactor = (float)rightPulses / (float)leftPulses;
   error = leftPulses * (currentErrorFactor - errorFactor);
+
+
+  Serial.print(" ELP ");
+  Serial.print(expectedRightMotorPulses);
+  Serial.print(" ERP ");
+  Serial.print(expectedLeftMotorPulses);
+
+  Serial.print(" err ");
+  Serial.print(error);
+  Serial.print(" errFac ");
+  Serial.print(errorFactor);
+  Serial.print(" currErrFac ");
+  Serial.print(currentErrorFactor);
 
   up = pidParams.Kp * error;
   derivatedError = (error - oldError) / timeDifference_sec;
