@@ -14,44 +14,35 @@
 #define WAIT(x) delay(x);
 ////////////////
 
-unsigned int distanceTOF_mm = 0;
+unsigned int distance = 0;
 unsigned int correctionFactor = 17158;
 float exponent_Factor = -0.797;
 
 unsigned int avalogValue = 0;
 unsigned long cmptData = 0;
 
+ static int last_time = 0;
+
 void terminalDisplay(int cmpt, int value1, int value2);
+int distanceTOF_mm();
 
 void setup() {
   
   Serial.begin(9600);
   pinMode(PIN_TOF, INPUT);
 
-
+  
 
 
   
 }
 
 void loop() {
-  
-  static int last_time = millis();
-  int current_time = millis();
 
-  if(current_time - last_time >= DATA_TIMEOUT){
-    avalogValue = analogRead(PIN_TOF);
-    distanceTOF_mm = (float) correctionFactor * pow((float) avalogValue, exponent_Factor);
 
-    terminalDisplay(cmptData, avalogValue, distanceTOF_mm);
-    cmptData ++;
+  terminalDisplay(cmptData, avalogValue, distance);
+  distance = distanceTOF_mm();
 
-    last_time = current_time;
-  }
-  else{
-    cmptData = 0;
-    last_time = current_time;
-  }
 }
 
 void terminalDisplay(int cmpt, int value1, int value2){
@@ -66,6 +57,26 @@ void terminalDisplay(int cmpt, int value1, int value2){
 
 }
 
+int distanceTOF_mm(){
+
+  unsigned int distanceTOF_mm = 0;
+
+ 
+  int current_time = millis();
+
+  if(current_time - last_time >= 1000){
+    avalogValue = analogRead(PIN_TOF);
+    distanceTOF_mm = (float) correctionFactor * pow((float) avalogValue, exponent_Factor);
+
+    cmptData ++;
+
+    last_time = current_time;
+    
+    return distanceTOF_mm;
+  }
+
+  
+}
 
 
 
