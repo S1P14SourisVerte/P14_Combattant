@@ -5,24 +5,31 @@
 
 #define PIN_WHISTLE A0
 int detect_whistle(void);
-int active;
+bool active;
 int current_zone = 0;
 
 void setup() {
     Serial.begin(9600);
     pinMode(PIN_WHISTLE, INPUT);
-    active = 0;
+    active = false;
     initialiser_color();
 }
 
 void loop() {
-  if(detect_whistle() == 1)
-    active = 1;
-  char start_color = Floor_Color();
-  smoothTurn(0.3, start_color);
-  move(0.3, 61, false, false);
-  smoothTurn(0.3, start_color);
-  
+  //Départ
+  if(detect_whistle() == 1){
+    active = true;
+  }
+  if (active){
+    char start_color = Floor_Color();
+    //CASE 1
+    smoothTurn(0.3, start_color);
+    //CASE 2
+    move(0.3, 61, false, false);
+    //CASE 3
+    smoothTurn(0.3, start_color);
+    //CASE 4-5
+  }
 }
 
 int detect_whistle(void) {
