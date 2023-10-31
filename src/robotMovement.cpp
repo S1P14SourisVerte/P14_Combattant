@@ -126,7 +126,7 @@ void resetEncoders()
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
 
-void turnSmooth(float motorSpeed)
+void turnSmooth(float motorSpeed, char laneColor)
 {
   float radius_little;
   float radius_big;
@@ -135,9 +135,7 @@ void turnSmooth(float motorSpeed)
   int expectedRightPulses;
   int expectedLeftPulses;
  
-  char detectedColor = 'J';
-  int turnMultiplier = detectedColor == 'V' ? 1 : 2;
-  // char detectedColor = Floor_Color();
+  int turnMultiplier = laneColor == 'V' ? 1 : 2;
  
   resetEncoders();
  
@@ -146,8 +144,8 @@ void turnSmooth(float motorSpeed)
   radius_big =
     turnMultiplier * FOOT_TO_CENTIMETER + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
  
-  distance_little = 2 * PI * (1.05*radius_little) / 4.00;
-  distance_big = 2 * PI * (1.04*radius_big) / 4.00;
+  distance_little = 2 * PI * (1.05 * radius_little) / 4.00;
+  distance_big = 2 * PI * (1.04 * radius_big) / 4.00;
   expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
   expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
  
@@ -170,14 +168,14 @@ void turnSmooth(float motorSpeed)
  
     pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
  
-    // Serial.print("TPL: ");
-    // Serial.print(expectedLeftPulses);
-    // Serial.print(", TPR: ");
-    // Serial.println(expectedRightPulses);
-    // Serial.print(", CPL: ");
-    // Serial.print(pulse_reel_gauche);
-    // Serial.print(", CPR: ");
-    // Serial.println(pulse_reel_droite);
+    Serial.print("TPL: ");
+    Serial.print(expectedLeftPulses);
+    Serial.print(", TPR: ");
+    Serial.println(expectedRightPulses);
+    Serial.print(", CPL: ");
+    Serial.print(pulse_reel_gauche);
+    Serial.print(", CPR: ");
+    Serial.println(pulse_reel_droite);
     Serial.println(distance_little);
     Serial.println(distance_big);
   }
@@ -185,42 +183,34 @@ void turnSmooth(float motorSpeed)
   stop();
 }
 
-void sharpTurn(float motorSpeed, turnDirection direction, float angle = 90.0f)
+void sharpTurn(turnDirection direction, float motorSpeed, float angle)
 {
   resetEncoders();
-      //   #define KP 0.0005
-      // #define KI 0.00000008
-      // #define KD 2.0
-      // #define ALPHA 0.5
-      // #define SATURATION_MAX 0.04
-      // #define SATURATION_MIN -0.04
-  pidInit(0.0005, 0.00000015, 2.0, 0.5, 0.08, -0.08);
   MOTOR_SetSpeed(LEFT_MOTOR, motorSpeed * direction);
   MOTOR_SetSpeed(RIGHT_MOTOR, -motorSpeed * direction);
-  // float angleCorrectionFactor = 1.5;
-  // if (direction == LeftTurn) {
-  //   angleCorrectionFactor = -1.15;
-  // }
-  // else {
-  //   angleCorrectionFactor = -0.09;
-  // }
-  float distance_cm = ((SELF_TURN_CIRCONFERENCE_CM / 360.0f) * (angle));// - angleCorrectionFactor));
+  float angleCorrectionFactor = 0.52;
+  if (direction == LeftTurn) {
+    angleCorrectionFactor = -0.7;
+  }
+  angleCorrectionFactor = (angleCorrectionFactor / 90) * angle;
+  float distance_cm = ((SELF_TURN_CIRCONFERENCE_CM / 360.0f) * (angle - angleCorrectionFactor));
   float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
-
-  int expectedLeftMotorPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
-  int expectedRightMotorPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
 
   while (abs((float)ENCODER_Read(LEFT_MOTOR)) <= PULSES_PER_WHEEL_CYCLE * distance_wheelCycles)
   {
-    // Serial.print("ELP: ");
-    // Serial.print(expectedLeftMotorPulses);
-    // Serial.print(", ERP: ");
-    // Serial.print(expectedRightMotorPulses);
-    // Serial.print(", CLP: ");
-    // Serial.print(ENCODER_Read(LEFT_MOTOR));
-    // Serial.print(", CRP: ");
-    // Serial.println(ENCODER_Read(RIGHT_MOTOR));
-    pid(motorSpeed * direction, -motorSpeed * direction, expectedLeftMotorPulses * direction, -expectedRightMotorPulses * direction);
+    correctTurnDirection(motorSpeed, direction);
   }
   stop();
+}
+
+void correctTurnDirection(float motorSpeed, turnDirection direction)
+{
+  if (abs(ENCODER_Read(LEFT_MOTOR)) < abs(ENCODER_Read(RIGHT_MOTOR)))
+  {
+    MOTOR_SetSpeed(RIGHT_MOTOR, (-motorSpeed * direction) / CORRECTION_MOTOR_SPEED_FACTOR);
+  }
+  else if (abs(ENCODER_Read(LEFT_MOTOR)) > abs(ENCODER_Read(RIGHT_MOTOR)))
+  {
+    MOTOR_SetSpeed(LEFT_MOTOR, (motorSpeed * direction) / CORRECTION_MOTOR_SPEED_FACTOR);
+  }
 }

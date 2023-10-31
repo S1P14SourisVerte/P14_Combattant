@@ -14,8 +14,9 @@ void loop()
   {
     // move(0.5, 500);
     // move(1, 250, true, true);
-    // smoothTurn(0.3);
-    sharpTurn(0.2, LeftTurn);
+    // smoothTurn(0.3, 'J');
+    sharpTurn(RightTurn);
+    // sharpTurn(LeftTurn);
     delay(1000);
     // Serial.print(", CPL: ");
     // Serial.print(ENCODER_Read(LEFT_MOTOR));
