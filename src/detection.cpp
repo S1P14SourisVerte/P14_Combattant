@@ -1,6 +1,5 @@
 #include "detection.hpp"
 
-float previousDistance;
 float currentDistance;
 float rightCorrection = 1;
 float leftCorrection = 1;
@@ -26,28 +25,28 @@ bool cupYellow() {
 }
 
 void followWall() {
-    previousDistance = distanceTOF_mm();
-
     #ifdef DEBUG
-        Serial.println(previousDistance);
+        Serial.println();
     #endif
 
     MOTOR_SetSpeed(LEFT, 0.3 * leftCorrection);
     MOTOR_SetSpeed(RIGHT, 0.3 * rightCorrection);
     currentDistance = analogRead(RIGHT_SENSOR);
-    if(currentDistance != TARGET_DISTANCE && previousDistance/currentDistance != 1.0f)
-        orientationFactor();
+
+    if(currentDistance < TARGET_DISTANCE)
+        orientationFactor(leftCorrection, rightCorrection);
+    if(currentDistance > TARGET_DISTANCE)
+        orientationFactor(rightCorrection, leftCorrection);
+
+    if(currentDistance == TARGET_DISTANCE) {
+        leftCorrection = 1;
+        rightCorrection = 1;
+    }
 }
 
-void orientationFactor() {
-    if(previousDistance/currentDistance > 1) {
-        leftCorrection = 0.9;
-        rightCorrection = 1.1;
-    }
-    else if (previousDistance/currentDistance < 1) {
-        leftCorrection = 1.1;
-        rightCorrection = 0.9;
-    }
+void orientationFactor(float lowerSpeed, float higherSpeed) {
+    lowerSpeed = 0.9;
+    higherSpeed = 1.1;
 }
 
 int distanceTOF_mm(){

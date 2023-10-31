@@ -18,6 +18,6 @@ bool cupGreen(void);
 void DetectionInit(void);
 bool cupYellow(void);
 void followWall();
-void orientationFactor();
+void orientationFactor(float, float);
 int distanceTOF_mm();
 #endif
