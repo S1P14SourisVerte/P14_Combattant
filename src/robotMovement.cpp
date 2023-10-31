@@ -126,7 +126,7 @@ void resetEncoders()
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
 
-void turnSmooth(float motorSpeed, char laneColor)
+void smoothTurn(float motorSpeed, char laneColor)
 {
   float radius_little;
   float radius_big;

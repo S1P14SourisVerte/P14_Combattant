@@ -1,4 +1,5 @@
 #include "detection.hpp"
+#include "robotMovement.hpp"
 
 float previousDistance;
 float currentDistance;
