@@ -126,6 +126,7 @@ void resetEncoders()
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
 
+
 void turnSmooth(float motorSpeed)
 {
   float radius_little;
