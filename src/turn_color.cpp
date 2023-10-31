@@ -276,11 +276,7 @@ void Detect_Line() {
    }
 }
 
-void setup() {
-// POUR LE TURN
-BoardInit();
-Serial.begin(9600);
-
+void initialiser_color() {
   // POUR LA COULEUR
 Wire.begin();
 
@@ -288,10 +284,4 @@ Wire.begin();
 pinMode(A1, INPUT);
 pinMode(A2, INPUT);
 pinMode(A3, INPUT);
-}
-
-void loop() {
-
-  Detect_Line();
-  
 }
