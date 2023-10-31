@@ -134,52 +134,93 @@ void turnSmooth(float motorSpeed)
   float distance_big;
   int expectedRightPulses;
   int expectedLeftPulses;
-
+ 
   char detectedColor = 'J';
   int turnMultiplier = detectedColor == 'V' ? 1 : 2;
   // char detectedColor = Floor_Color();
-
+ 
   resetEncoders();
-
-  radius_little = 
+ 
+  radius_little =
     (turnMultiplier * FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2);
-  radius_big = 
+  radius_big =
     turnMultiplier * FOOT_TO_CENTIMETER + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
-
-  distance_little = (2 * PI * radius_little) / 4;
-  distance_big = (2 * PI * radius_big) / 4;
-
+ 
+  distance_little = 2 * PI * (1.05*radius_little) / 4.00;
+  distance_big = 2 * PI * (1.04*radius_big) / 4.00;
   expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
   expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
-
+ 
   int pulse_reel_gauche;
   int pulse_reel_droite;
-
+ 
   pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
   pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
-  
+ 
   float leftMotorSpeed = motorSpeed;
   float rightMotorSpeed = motorSpeed * (distance_little / distance_big);
-
+ 
   MOTOR_SetSpeed(LEFT_MOTOR, leftMotorSpeed);
   MOTOR_SetSpeed(RIGHT_MOTOR, rightMotorSpeed);
-
+ 
   while ((float)ENCODER_Read(RIGHT_MOTOR) < expectedRightPulses)
   {
     pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
     pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
-
+ 
     pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
-
-    Serial.print("TPL: ");
-    Serial.print(expectedLeftPulses);
-    Serial.print(", TPR: ");
-    Serial.println(expectedRightPulses);
-    Serial.print(", CPL: ");
-    Serial.print(pulse_reel_gauche);
-    Serial.print(", CPR: ");
-    Serial.println(pulse_reel_droite);
+ 
+    // Serial.print("TPL: ");
+    // Serial.print(expectedLeftPulses);
+    // Serial.print(", TPR: ");
+    // Serial.println(expectedRightPulses);
+    // Serial.print(", CPL: ");
+    // Serial.print(pulse_reel_gauche);
+    // Serial.print(", CPR: ");
+    // Serial.println(pulse_reel_droite);
+    Serial.println(distance_little);
+    Serial.println(distance_big);
   }
+ 
+  stop();
+}
 
+void sharpTurn(float motorSpeed, turnDirection direction, float angle = 90.0f)
+{
+  resetEncoders();
+      //   #define KP 0.0005
+      // #define KI 0.00000008
+      // #define KD 2.0
+      // #define ALPHA 0.5
+      // #define SATURATION_MAX 0.04
+      // #define SATURATION_MIN -0.04
+  pidInit(0.0005, 0.00000015, 2.0, 0.5, 0.08, -0.08);
+  MOTOR_SetSpeed(LEFT_MOTOR, motorSpeed * direction);
+  MOTOR_SetSpeed(RIGHT_MOTOR, -motorSpeed * direction);
+  // float angleCorrectionFactor = 1.5;
+  // if (direction == LeftTurn) {
+  //   angleCorrectionFactor = -1.15;
+  // }
+  // else {
+  //   angleCorrectionFactor = -0.09;
+  // }
+  float distance_cm = ((SELF_TURN_CIRCONFERENCE_CM / 360.0f) * (angle));// - angleCorrectionFactor));
+  float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
+
+  int expectedLeftMotorPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
+  int expectedRightMotorPulses = distance_wheelCycles * PULSES_PER_WHEEL_CYCLE;
+
+  while (abs((float)ENCODER_Read(LEFT_MOTOR)) <= PULSES_PER_WHEEL_CYCLE * distance_wheelCycles)
+  {
+    // Serial.print("ELP: ");
+    // Serial.print(expectedLeftMotorPulses);
+    // Serial.print(", ERP: ");
+    // Serial.print(expectedRightMotorPulses);
+    // Serial.print(", CLP: ");
+    // Serial.print(ENCODER_Read(LEFT_MOTOR));
+    // Serial.print(", CRP: ");
+    // Serial.println(ENCODER_Read(RIGHT_MOTOR));
+    pid(motorSpeed * direction, -motorSpeed * direction, expectedLeftMotorPulses * direction, -expectedRightMotorPulses * direction);
+  }
   stop();
 }

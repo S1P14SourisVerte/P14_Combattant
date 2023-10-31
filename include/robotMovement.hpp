@@ -37,5 +37,6 @@ void move(float motorSpeed, int distance_cm, bool hasAcceleration = true, bool h
 float getAcceleration(unsigned int startTime, bool isAcceleration = true);
 void stop();
 void resetEncoders();
-void turnSmooth(float motorSpeed);
+void smoothTurn(float motorSpeed);
+void sharpTurn(float motorSpeed, turnDirection direction, float angle = 90.0);
 #endif
