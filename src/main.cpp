@@ -1,27 +1,24 @@
 #include <Arduino.h>
 #include <LibRobus.h>
 
-#include "robotMovement.hpp"
+#define PIN_WHISTLE A0
+int detect_whistle(void);
+int active;
+int current_zone = 0;
 
-void setup() 
-{
-  BoardInit();
+void setup() {
+    Serial.begin(9600);
+    pinMode(PIN_WHISTLE, INPUT);
+    active = 0;
 }
 
-void loop()
-{
-  if(ROBUS_IsBumper(3))
-  {
-    // move(0.5, 500);
-    // move(1, 250, true, true);
-    // smoothTurn(0.3, 'J');
-    sharpTurn(RightTurn);
-    // sharpTurn(LeftTurn);
-    delay(1000);
-    // Serial.print(", CPL: ");
-    // Serial.print(ENCODER_Read(LEFT_MOTOR));
-    // Serial.print(", CPR: ");
-    // Serial.println(ENCODER_Read(RIGHT_MOTOR));
-    // exit(EXIT_SUCCESS);
-  }
+void loop() {
+  if(detect_whistle() == 1)
+    active = 1;
+  
+}
+
+int detect_whistle(void) {
+    int valueIn = analogRead(PIN_WHISTLE);
+    return((valueIn >= 400) ? 1 : 0);
 }
