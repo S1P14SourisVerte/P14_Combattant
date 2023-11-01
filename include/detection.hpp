@@ -12,12 +12,10 @@
 #define RIGHT_SENSOR A7
 #define CUP_DISTANCE 150.0
 #define TARGET_DISTANCE 340.0
-// -> 0.86 V
 
 bool cupGreen(void);
 void DetectionInit(void);
 bool cupYellow(void);
 void followWall();
-void orientationFactor(float, float);
 int distanceTOF_mm();
 #endif
