@@ -125,3 +125,92 @@ void resetEncoders()
   ENCODER_ReadReset(LEFT_MOTOR);
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
+
+void turnSmooth(float motorSpeed, char laneColor)
+{
+  float radius_little;
+  float radius_big;
+  float distance_little;
+  float distance_big;
+  int expectedRightPulses;
+  int expectedLeftPulses;
+ 
+  int turnMultiplier = laneColor == 'V' ? 1 : 2;
+ 
+  resetEncoders();
+ 
+  radius_little =
+    (turnMultiplier * FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2);
+  radius_big =
+    turnMultiplier * FOOT_TO_CENTIMETER + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
+ 
+  distance_little = 2 * PI * (1.05 * radius_little) / 4.00;
+  distance_big = 2 * PI * (1.04 * radius_big) / 4.00;
+  expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
+  expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
+ 
+  int pulse_reel_gauche;
+  int pulse_reel_droite;
+ 
+  pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
+  pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
+ 
+  float leftMotorSpeed = motorSpeed;
+  float rightMotorSpeed = motorSpeed * (distance_little / distance_big);
+ 
+  MOTOR_SetSpeed(LEFT_MOTOR, leftMotorSpeed);
+  MOTOR_SetSpeed(RIGHT_MOTOR, rightMotorSpeed);
+ 
+  while ((float)ENCODER_Read(RIGHT_MOTOR) < expectedRightPulses)
+  {
+    pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
+    pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
+ 
+    pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
+ 
+    Serial.print("TPL: ");
+    Serial.print(expectedLeftPulses);
+    Serial.print(", TPR: ");
+    Serial.println(expectedRightPulses);
+    Serial.print(", CPL: ");
+    Serial.print(pulse_reel_gauche);
+    Serial.print(", CPR: ");
+    Serial.println(pulse_reel_droite);
+    Serial.println(distance_little);
+    Serial.println(distance_big);
+  }
+ 
+  stop();
+}
+
+void sharpTurn(turnDirection direction, float motorSpeed, float angle)
+{
+  resetEncoders();
+  MOTOR_SetSpeed(LEFT_MOTOR, motorSpeed * direction);
+  MOTOR_SetSpeed(RIGHT_MOTOR, -motorSpeed * direction);
+  float angleCorrectionFactor = 0.52;
+  if (direction == LeftTurn) {
+    angleCorrectionFactor = -0.7;
+  }
+  angleCorrectionFactor = (angleCorrectionFactor / 90) * angle;
+  float distance_cm = ((SELF_TURN_CIRCONFERENCE_CM / 360.0f) * (angle - angleCorrectionFactor));
+  float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
+
+  while (abs((float)ENCODER_Read(LEFT_MOTOR)) <= PULSES_PER_WHEEL_CYCLE * distance_wheelCycles)
+  {
+    correctTurnDirection(motorSpeed, direction);
+  }
+  stop();
+}
+
+void correctTurnDirection(float motorSpeed, turnDirection direction)
+{
+  if (abs(ENCODER_Read(LEFT_MOTOR)) < abs(ENCODER_Read(RIGHT_MOTOR)))
+  {
+    MOTOR_SetSpeed(RIGHT_MOTOR, (-motorSpeed * direction) / CORRECTION_MOTOR_SPEED_FACTOR);
+  }
+  else if (abs(ENCODER_Read(LEFT_MOTOR)) > abs(ENCODER_Read(RIGHT_MOTOR)))
+  {
+    MOTOR_SetSpeed(LEFT_MOTOR, (motorSpeed * direction) / CORRECTION_MOTOR_SPEED_FACTOR);
+  }
+}

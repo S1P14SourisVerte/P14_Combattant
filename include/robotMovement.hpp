@@ -9,8 +9,12 @@
 #define RIGHT_MOTOR 1
 
 #define WHEEL_CIRCONFERENCE_CM 23.93f
+#define DISTANCE_BETWEEN_WHEELS_CM 19.3055
 #define SELF_TURN_CIRCONFERENCE_CM 60.65f
 #define PULSES_PER_WHEEL_CYCLE 3200.0f
+#define CORRECTION_MOTOR_SPEED_FACTOR 1.25f
+
+#define FOOT_TO_CENTIMETER 30.48
 
 typedef enum {
     RightTurn = 1,
@@ -34,4 +38,7 @@ void move(float motorSpeed, int distance_cm, bool hasAcceleration = true, bool h
 float getAcceleration(unsigned int startTime, bool isAcceleration = true);
 void stop();
 void resetEncoders();
+void smoothTurn(float motorSpeed, char laneColor);
+void sharpTurn(turnDirection direction, float motorSpeed = 0.25, float angle = 90.0);
+void correctTurnDirection(float motorSpeed, turnDirection direction);
 #endif
