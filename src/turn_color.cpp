@@ -2,15 +2,18 @@
 #include <Adafruit_TCS34725.h>
 #include <Arduino.h>
 #include <Librobus.h>
+#include <robotMovement.hpp>
+#include <detection.hpp>
+#include <robotServo.hpp>
 
 #define Wheel_Circumference 22.86
 #define Foot_To_Centimeter 30.48
 #define Distance_Between_Wheels 19.0
-#define motor_SetSpeed 0.10
+#define motor_SetSpeed 0.30
+#define REF 50
 
+bool Cup_Drop = false;
 // POUR QUE LA FONCTION SUIVEUR DE LIGNE FONCTIONNE => Définition de la couleur de départ
-
-char Start_Color = 'V';
 
 // Fonction pour la COULEUR
 
@@ -49,179 +52,39 @@ char Floor_Color() {
   return 'E';
 }
 
-// Fonction pour TOURNER
-
-void Turn_DF() {
-  float radius_little;
-  float radius_big;
-  float distance_little;
-  float distance_big;
-  int pulse_droite;
-  int pulse_gauche;
-
-//Si la couleur détecté est verte
-
-  if (Floor_Color() == 'V') {
-
-    radius_little = Foot_To_Centimeter + ((Foot_To_Centimeter/2) - (Distance_Between_Wheels/2));
-    radius_big = Foot_To_Centimeter + ((Foot_To_Centimeter/2) + (Distance_Between_Wheels/2));
-
-    distance_little = ((2 * PI * radius_little)/4);
-    distance_big = ((2 * PI * radius_big)/4);
- 
-    pulse_droite = ((distance_little / Wheel_Circumference) * 3200);
-    pulse_gauche = ((distance_big / Wheel_Circumference) * 3200);
-  }
-  
-  
-  //Si la couleur détecté est JAUNE
-
-  else if (Floor_Color() == 'J') {
-
-    radius_little = 2* Foot_To_Centimeter + ((Foot_To_Centimeter/2) - (Distance_Between_Wheels/2));
-    radius_big = 2* Foot_To_Centimeter + ((Foot_To_Centimeter/2) + (Distance_Between_Wheels/2));
-
-    distance_little = ((2 * PI * radius_little)/4);
-    distance_big = ((2 * PI * radius_big)/4);
-
-    pulse_droite = ((distance_little / Wheel_Circumference) * 3200);
-    pulse_gauche = ((distance_big / Wheel_Circumference) * 3200);
-
-  }
-
-  int pulse_reel_gauche;
-  int pulse_reel_droite;
-
-  pulse_reel_gauche = ENCODER_Read(0);
-  pulse_reel_droite = ENCODER_Read(1);
-  
-  while ((pulse_reel_gauche < pulse_gauche) && (pulse_reel_droite < pulse_droite))
-  {
-    MOTOR_SetSpeed(0, (0.20));
-    MOTOR_SetSpeed(1, (1.07* 0.20 * (distance_little/distance_big)));
-
-  pulse_reel_gauche = ENCODER_Read(0);
-  pulse_reel_droite = ENCODER_Read(1);
-  }
-
-  MOTOR_SetSpeed(0,0);
-  MOTOR_SetSpeed(1,0);
-
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
-}
-
-// Fonction pour tourner les deux roues
- 
-void Turn_2_Wheel(float speed, float angle, int direction) {
- 
-  float ratio_p_a;
-  float ratio_a_c;
-  float circonferenceTrajectory = 23.88;
-  float circonferenceWheel = 9.4247;
-  float pulses;
-  float LeftPulses;
-  float RightPulses;
-  float pulsesDifference;
-  float newSpeedLeft;
-  float newSpeedRight;
- 
-  ratio_a_c = (angle / 360) * circonferenceTrajectory;
-  ratio_p_a = (ratio_a_c / circonferenceWheel);
-  pulses = (ratio_p_a * 3200);
- 
-  // Encoder variable
- 
-  LeftPulses = (float)abs(ENCODER_Read(0));
-  RightPulses = (float)abs(ENCODER_Read(1));
- 
-  if (direction == 0) {
-    while (LeftPulses < pulses)
-    {
- 
-      MOTOR_SetSpeed(0, 0.98*speed);
-      MOTOR_SetSpeed(1, -speed);
-      LeftPulses = (float)abs(ENCODER_Read(0));
-      RightPulses = (float)abs(ENCODER_Read(1));
- 
-    }
- 
-    LeftPulses = (float)abs(ENCODER_Read(0));
-    RightPulses = (float)abs(ENCODER_Read(1));
- 
-    while (LeftPulses >= RightPulses)
- 
-    {
-      RightPulses = (float)abs(ENCODER_Read(1));
-      MOTOR_SetSpeed(0, 0);
-      MOTOR_SetSpeed(1, -0.01);
-      RightPulses = (float)abs(ENCODER_Read(1));
-    }
- 
-    MOTOR_SetSpeed(1, 0);
- 
-  } else
- 
-    while ((pulses >= LeftPulses) && (pulses >= RightPulses)) {
- 
-      LeftPulses = (float)ENCODER_Read(0);
-      RightPulses = (float)ENCODER_Read(1);
-      pulsesDifference = LeftPulses - RightPulses;
-      newSpeedLeft = speed - (0.0005 * pulsesDifference);
-      newSpeedRight= speed + (0.0001 * pulsesDifference);
- 
-      MOTOR_SetSpeed(0, -1*newSpeedLeft);
-      MOTOR_SetSpeed(1, newSpeedRight);
- 
-      LeftPulses = (float)ENCODER_Read(0);
-      RightPulses = (float)ENCODER_Read(1);
- 
-    }
- 
-  MOTOR_SetSpeed(0, 0);
-  MOTOR_SetSpeed(1, 0);
-  ENCODER_Reset(0);
-  ENCODER_Reset(1);
- 
-}
-
 // Fonction pour le suiveur de ligne
 
-void Detect_Line() {
-  
-  // Si couleur qu'on était est verte
-  if (Start_Color == 'V')
-    {
-    
+void Detect_Line(char Start_Color) {
+
     // Capteur Gauche => A1
     // Capteur Centre => A2
     // Capteur Droit => A3
 
-    while (analogRead(A1) > 5)
+  // Si couleur qu'on était est verte
+
+  if (Start_Color == 'V')
+    {
+
+    while (analogRead(A1) > REF)
     {
       MOTOR_SetSpeed(LEFT, motor_SetSpeed);
       MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
     }
-
-    delay(100);
-
-    MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
-    MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
   
-    while (analogRead(A2) > 5)
+    while (analogRead(A3) > REF)
     {
-      MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
-      MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
+      MOTOR_SetSpeed(LEFT, 0.10);
+      MOTOR_SetSpeed(RIGHT, 0.10);
     }
 
-    delay(50);
+    // UTILE POUR QU'IL SE METTE EXACTEMENT AVEC LE CAPTEUR AU MILIEU
   
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
-
-    delay(100);
   
-    Turn_2_Wheel(0.10, 45, 0);
+    delay(100);
+
+    sharpTurn(RightTurn, 0.25, 40);
 
     delay(100);
   
@@ -236,53 +99,236 @@ void Detect_Line() {
     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
   
-    delay(1000);
+    delay(500);
 
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 
-    Turn_2_Wheel(motor_SetSpeed, 90, 0);
+    sharpTurn(RightTurn, 0.25, 90);
 
-    while (analogRead(A3) > 5)
+    while (analogRead(A3) > REF)
     {
       MOTOR_SetSpeed(LEFT, motor_SetSpeed);
       MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
     }
-
-    delay(100);
-
-    MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
-    MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
   
-    while (analogRead(A2) > 5)
+    while (analogRead(A1) > REF)
     {
-      MOTOR_SetSpeed(LEFT, 0.5* motor_SetSpeed);
-      MOTOR_SetSpeed(RIGHT, 0.5* motor_SetSpeed);
+      MOTOR_SetSpeed(LEFT, 0.10);
+      MOTOR_SetSpeed(RIGHT, 0.10);
     }
 
-    delay(50);
+    MOTOR_SetSpeed(LEFT, 0.10);
+    MOTOR_SetSpeed(RIGHT, 0.10);
+
+    delay(1000);
+    // UTILE POUR QU'IL SE METTE EXACTEMENT AVEC LE CAPTEUR AU MILIEU
   
     MOTOR_SetSpeed(LEFT, 0);
     MOTOR_SetSpeed(RIGHT, 0);
 
-    delay(100);
-  
-    Turn_2_Wheel(0.10, 45, 0);
+    sharpTurn(RightTurn, 0.25, 40);
 
     delay(100);
   
     MOTOR_SetSpeed(LEFT, motor_SetSpeed);
     MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
    }
+
+  // 4 POSSIBILITÉS
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+
+  while (Floor_Color() != 'J' || Floor_Color() != 'V')
+  {
+
+    if (analogRead(A1) < REF)
+    {
+      Serial.print("Correction à droite");
+      MOTOR_SetSpeed(LEFT, 0.12);
+      MOTOR_SetSpeed(RIGHT, 0.30);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A2) < REF)
+    {
+      Serial.print("Pas de correction");
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A3) < REF)
+    {
+      Serial.print("Correction à gauche");
+      MOTOR_SetSpeed(LEFT, 0.30);
+      MOTOR_SetSpeed(RIGHT, 0.12);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (((analogRead(A1) > REF) && (analogRead(A2) > REF) && (analogRead(A3) > REF)) && (ENCODER_Read(LEFT) > 8150))
+    {
+      Serial.print("Tous sont dans le blanc et sortis");
+      sharpTurn(RightTurn, 0.25, 50);
+      delay(50);
+
+      while (analogRead(A3) > REF){
+        MOTOR_SetSpeed(LEFT, 0.15);
+        MOTOR_SetSpeed(RIGHT, 0.15);
+      }
+  
+      while (analogRead(A1) > REF){
+        MOTOR_SetSpeed(LEFT, 0.10);
+        MOTOR_SetSpeed(RIGHT, 0.10);
+      }
+
+      delay(50);
+  
+      MOTOR_SetSpeed(LEFT, 0);
+      MOTOR_SetSpeed(RIGHT, 0);
+
+      Serial.print("Fin du tournant");
+    }
+  }
 }
 
+void Detect_Line2(char Start_Color)
+{
+  // AVANCE ET TOURNE JUSQU'AU MILIEU DE LA LIGNE
+  move(1.00, 60, false, false);
+  sharpTurn(RightTurn, 0.25);
+
+  if (Start_Color = 'V')
+  move (0.25, 30);
+
+  else if (Start_Color = 'J')
+    move(0.25, 60);
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+
+  while ((ENCODER_Read(LEFT) < 8150)){
+
+    if ((distanceTOF_mm() > 100) && (distanceTOF_mm() < 120) && (Cup_Drop == false))
+    {
+      move(0.25,5);
+      dropCup();
+      Cup_Drop = true;
+    }
+    else {
+       if (analogRead(A1) < REF)
+    {
+      Serial.print("Correction à droite");
+      MOTOR_SetSpeed(LEFT, 0.12);
+      MOTOR_SetSpeed(RIGHT, 0.30);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A2) < REF)
+    {
+      Serial.print("Pas de correction");
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A3) < REF)
+    {
+      Serial.print("Correction à gauche");
+      MOTOR_SetSpeed(LEFT, 0.30);
+      MOTOR_SetSpeed(RIGHT, 0.12);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else
+    {
+      MOTOR_SetSpeed(LEFT, 0.25);
+      MOTOR_SetSpeed(RIGHT, 0.25);
+    }
+    }
+  }
+
+  MOTOR_SetSpeed(LEFT, 0);
+  MOTOR_SetSpeed(RIGHT, 0);
+
+  sharpTurn(RightTurn, 0.25, 45);
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+
+// MEME PRINCIPE POUR LA DEUXIÈME LIGNE OÙ IL PEUT AVOIR LA BALLE
+
+while ((ENCODER_Read(LEFT) < 11525)){
+
+    if ((distanceTOF_mm() > 100) && (distanceTOF_mm() < 120) && (Cup_Drop == false))
+    {
+      move(0.25,5);
+      dropCup();
+      Cup_Drop = true;
+    }
+    else if (Cup_Drop == true) {
+      move(0.25, 86);
+    }
+    else{
+       if (analogRead(A1) < REF)
+    {
+      Serial.print("Correction à droite");
+      MOTOR_SetSpeed(LEFT, 0.12);
+      MOTOR_SetSpeed(RIGHT, 0.30);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A2) < REF)
+    {
+      Serial.print("Pas de correction");
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else if (analogRead(A3) < REF)
+    {
+      Serial.print("Correction à gauche");
+      MOTOR_SetSpeed(LEFT, 0.30);
+      MOTOR_SetSpeed(RIGHT, 0.12);
+      delay(75);
+      MOTOR_SetSpeed(LEFT, motor_SetSpeed);
+      MOTOR_SetSpeed(RIGHT, motor_SetSpeed);
+    }
+
+    else
+    {
+      MOTOR_SetSpeed(LEFT, 0.25);
+      MOTOR_SetSpeed(RIGHT, 0.25);
+    }
+    }
+  }
+
+  MOTOR_SetSpeed(LEFT, 0);
+  MOTOR_SetSpeed(RIGHT, 0);
+
+  sharpTurn(RightTurn, 0.25, 45);
+
+  ENCODER_Reset(LEFT);
+  ENCODER_Reset(RIGHT);
+}
 void setup() {
 // POUR LE TURN
 BoardInit();
 Serial.begin(9600);
 
-  // POUR LA COULEUR
+// POUR LA COULEUR
 Wire.begin();
+
+// POUR LE SERVO MOTEUR
+servoInit();
 
 // POUR LE SUIVEUR DE LIGNE
 pinMode(A1, INPUT);
@@ -291,7 +337,12 @@ pinMode(A3, INPUT);
 }
 
 void loop() {
-
-  Detect_Line();
+  
+  Serial.println("COMMENCE");
+  MOTOR_SetSpeed(LEFT, 0.0);
+  MOTOR_SetSpeed(RIGHT, 0.0);
+  delay(5000);
+  MOTOR_SetSpeed(LEFT, 0.5);
+  MOTOR_SetSpeed(RIGHT, 0.5);
   
 }
