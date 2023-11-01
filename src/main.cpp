@@ -32,10 +32,12 @@ void SECTION_4_5() {
 
 void SECTION_9_0() {
     move(1, 200, true, true);
-
 }
 
 void loop()
 {
-    followWall();
+    Serial.println(distanceTOF_mm());
+    if(ROBUS_IsBumper(1))
+        followWall();
+
 }

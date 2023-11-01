@@ -25,28 +25,23 @@ bool cupYellow() {
 }
 
 void followWall() {
-    #ifdef DEBUG
-        Serial.println();
-    #endif
 
     MOTOR_SetSpeed(LEFT, 0.3 * leftCorrection);
     MOTOR_SetSpeed(RIGHT, 0.3 * rightCorrection);
     currentDistance = analogRead(RIGHT_SENSOR);
-
-    if(currentDistance < TARGET_DISTANCE)
-        orientationFactor(leftCorrection, rightCorrection);
-    if(currentDistance > TARGET_DISTANCE)
-        orientationFactor(rightCorrection, leftCorrection);
-
+    Serial.println(currentDistance);
+    if(currentDistance < TARGET_DISTANCE) {
+        leftCorrection = 0.8;
+        rightCorrection = 1.2;
+    }
+    if(currentDistance > TARGET_DISTANCE) {
+        leftCorrection = 1.2;
+        rightCorrection = 0.8;
+    }
     if(currentDistance == TARGET_DISTANCE) {
         leftCorrection = 1;
         rightCorrection = 1;
     }
-}
-
-void orientationFactor(float lowerSpeed, float higherSpeed) {
-    lowerSpeed = 0.9;
-    higherSpeed = 1.1;
 }
 
 int distanceTOF_mm(){
