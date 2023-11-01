@@ -18,12 +18,14 @@ static int last_time = 0;
 bool cupGreen() {
     int green = digitalRead(GREEN);
     int red = digitalRead(RED);
-    return((green == 1 || red == 1) ? true : false);
+ 
+    return((green == 0 || red == 0) ? true : false);
 }
 
 bool cupYellow() {
     float distance = distanceTOF_mm();
-    return((distance > CUP_DISTANCE) ? true : false);
+    Serial.println(distance);
+    return((distance < CUP_DISTANCE) ? true : false);
 }
 
 void followWall() {

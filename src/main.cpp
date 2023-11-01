@@ -22,8 +22,9 @@ void setup() {
 }
 
 void loop() {
+  Serial.println(Floor_Color());
   //Départ
-  if(detect_whistle() == 1){
+  if(detect_whistle() == 1 || ROBUS_IsBumper(1)){
     active = true;
   }
   if (active) {
@@ -64,21 +65,24 @@ int detect_whistle(void) {
 }
 
 void SECTION_4_5() {
+  int i = 0;
   while (Floor_Color() == start_color){
     if(Floor_Color() == 'V') {
       move(0.3, 5, false, false);
-      if(cupGreen()) {
+      if(cupGreen() && i<2) {
         sharpTurn(RightTurn);
         sweepCup();
         sharpTurn(LeftTurn);
+        i++;
       }
     }  
     else if(Floor_Color() == 'Y') {
       move(0.3, 5, false, false);
-      if(cupYellow()) {
+      if(cupYellow()&& i<2) {
         sharpTurn(LeftTurn);
         sweepCup();
         sharpTurn(RightTurn);
+        i++;
       }
     }
   }

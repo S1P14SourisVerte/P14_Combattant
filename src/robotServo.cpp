@@ -13,7 +13,7 @@ void sweepCup(void)
 {
     int counter = 0;
 
-    while(counter < 4) {
+    while(counter < 2) {
         SERVO_SetAngle(SERVO_2, 0);
         delay(650);
         SERVO_SetAngle(SERVO_2, 180);

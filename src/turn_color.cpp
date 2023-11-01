@@ -25,15 +25,15 @@ char Floor_Color() {
   delay(300);
 
 // VERT
-  if (((red > 22) && (red < 36)) && ((green > 38) && (green < 50)) && ((blue > 28) && (blue < 46))){
+  if (((red > 26) && (red < 40)) && ((green > 42) && (green < 58)) && ((blue > 34) && (blue < 50))){
   return 'V';
   }
 // JAUNE
-  else if (((red > 108) && (red < 120)) && ((green > 96) && (green < 108)) && ((blue > 48) && (blue < 59))){
+  else if (((red > 108) && (red < 120)) && ((green > 98) && (green < 110)) && ((blue > 54) && (blue < 66))){
   return 'J';
   }
 // ROUGE
-  else if (((red > 46) && (red < 59)) && ((green > 29) && (green < 42)) && ((blue > 27) && (blue < 37))){
+  else if (((red > 46) && (red < 59)) && ((green > 34) && (green < 48)) && ((blue > 32) && (blue < 47))){
   return 'R';
   }
 // BLANC
@@ -41,7 +41,7 @@ char Floor_Color() {
   return 'W';
   }
 // BLEU
- else if (((red > 18) && (red < 32)) && ((green > 30) && (green < 46)) && ((blue > 42) && (blue < 60))){
+ else if (((red > 24) && (red < 39)) && ((green > 34) && (green < 49)) && ((blue > 42) && (blue < 60))){
   return 'B';
   }
 
