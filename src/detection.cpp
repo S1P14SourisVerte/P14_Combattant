@@ -21,51 +21,73 @@ bool cupYellow() {
 }
 
 void followWall() {
-    MOTOR_SetSpeed(LEFT, 0);
-    MOTOR_SetSpeed(RIGHT, 0);
-    delay(100);
+  // Serial.print("current : ");
+  // int test = distanceTOF_mm();
+  // Serial.println(test);
+  // delay(1000);
+  // sharpTurn(RightTurn, 0.1, 10.0);
+  // delay(10);
+  stop();
+    // delay(100);
 
-    float previousDistance;
-    float currentDistance;
-    turnDirection direction = RightTurn;
+    int previousDistance;
+    int currentDistance;
+    int direction = 1;
 
     currentDistance = distanceTOF_mm();
-    
-    delay(100);
+    sharpTurn(RightTurn, 0.1, 10.0);
 
-    MOTOR_SetSpeed(LEFT, 0);
-    MOTOR_SetSpeed(RIGHT, 0);
+    // delay(500);
     previousDistance = currentDistance;
     currentDistance = distanceTOF_mm();
-    delay(100);
-    
-    direction = (previousDistance < currentDistance) ? RIGHT : LEFT;
-    do{
-         MOTOR_SetSpeed(direction, 0.3);
-         previousDistance = currentDistance;
-         currentDistance = distanceTOF_mm();
-    }while(previousDistance < currentDistance && previousDistance/currentDistance < 1);
-   
+    // delay(500);
 
+    Serial.print("previous : ");
+    Serial.println(previousDistance);
+    Serial.print("current : ");
+    Serial.println(currentDistance);
+  
+    direction = (previousDistance > currentDistance) ? direction : direction * -1;
+    Serial.println(distance);
+    if(direction == 1)
+      correctAngle(currentDistance, previousDistance, RightTurn);
+    else
+      correctAngle(currentDistance, previousDistance, LeftTurn);
+
+  while(analogRead(A1) < 50 || analogRead(A2) < 50 || analogRead(A3) < 50)
+    move(0.3, 5, false, false);
+  delay(1000);
+}
+
+void correctAngle(int currentDistance, int previousDistance, turnDirection d) {
+  while(previousDistance > currentDistance && previousDistance/currentDistance > 1) {
+    sharpTurn(d, 0.1, 10.0);
+    previousDistance = currentDistance;
+    currentDistance = distanceTOF_mm();
+
+    Serial.print("previous : ");
+    Serial.println(previousDistance);
+    Serial.print("current : ");
+    Serial.println(currentDistance);
+  }
 }
 
 int distanceTOF_mm(){
 
   unsigned int distanceTOF_mm = 0;
 
- 
-  int current_time = millis();
+  // int current_time = millis();
 
-  if(current_time - last_time >= 1000){
+  // if(current_time - last_time >= 1000){
     avalogValue = analogRead(RIGHT_SENSOR);
     distanceTOF_mm = (float) correctionFactor * pow((float) avalogValue, exponent_Factor);
 
     cmptData ++;
 
-    last_time = current_time;
+    // last_time = current_time;
     
     return distanceTOF_mm;
-  }
+  // }
 }
 
 void DetectionInit(void) {
@@ -73,7 +95,4 @@ void DetectionInit(void) {
     pinMode(GREEN, INPUT);
     pinMode(RED, INPUT);
     pinMode(RIGHT_SENSOR, INPUT);
-
-    leftCorrection = 1;
-    rightCorrection = 1;
 }

@@ -36,8 +36,8 @@ void SECTION_9_0() {
 
 void loop()
 {
-    Serial.println(distanceTOF_mm());
-    if(ROBUS_IsBumper(1))
-        followWall();
-
+    // Serial.println(distanceTOF_mm());
+    // if(ROBUS_IsBumper(1))
+    //     followWall();
+    followWall();
 }

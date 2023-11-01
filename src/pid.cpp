@@ -53,17 +53,17 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   error = leftPulses * (currentErrorFactor - errorFactor);
 
 
-  Serial.print(" ELP ");
-  Serial.print(expectedRightMotorPulses);
-  Serial.print(" ERP ");
-  Serial.print(expectedLeftMotorPulses);
+  // Serial.print(" ELP ");
+  // Serial.print(expectedRightMotorPulses);
+  // Serial.print(" ERP ");
+  // Serial.print(expectedLeftMotorPulses);
 
-  Serial.print(" err ");
-  Serial.print(error);
-  Serial.print(" errFac ");
-  Serial.print(errorFactor);
-  Serial.print(" currErrFac ");
-  Serial.print(currentErrorFactor);
+  // Serial.print(" err ");
+  // Serial.print(error);
+  // Serial.print(" errFac ");
+  // Serial.print(errorFactor);
+  // Serial.print(" currErrFac ");
+  // Serial.print(currentErrorFactor);
 
   up = pidParams.Kp * error;
   derivatedError = (error - oldError) / timeDifference_sec;
@@ -86,22 +86,22 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
 
   previousTime = millis() - currentTime;
 
-#ifdef DEBUG
-  Serial.print(" e_g ");
-  Serial.print(ENCODER_Read(LEFT_MOTOR));
-  Serial.print(" e_d ");
-  Serial.print(ENCODER_Read(RIGHT_MOTOR));
-  Serial.print(" v ");
-  Serial.print(adjustedLeftSpeed);
-  Serial.print(" u ");
-  Serial.print(u);
-  Serial.print(" ui ");
-  Serial.print(ui);
-  Serial.print(" up ");
-  Serial.print(up);
-  Serial.print(" ud ");
-  Serial.println(ud);
-#endif
+// #ifdef DEBUG
+//   Serial.print(" e_g ");
+//   Serial.print(ENCODER_Read(LEFT_MOTOR));
+//   Serial.print(" e_d ");
+//   Serial.print(ENCODER_Read(RIGHT_MOTOR));
+//   Serial.print(" v ");
+//   Serial.print(adjustedLeftSpeed);
+//   Serial.print(" u ");
+//   Serial.print(u);
+//   Serial.print(" ui ");
+//   Serial.print(ui);
+//   Serial.print(" up ");
+//   Serial.print(up);
+//   Serial.print(" ud ");
+//   Serial.println(ud);
+// #endif
   
   // Le delais non bloquant fait passer le delta pulses de 10 a environ 100-120
   // donc jutilise la fonction delay()

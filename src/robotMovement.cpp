@@ -168,16 +168,16 @@ void turnSmooth(float motorSpeed, char laneColor)
  
     pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
  
-    Serial.print("TPL: ");
-    Serial.print(expectedLeftPulses);
-    Serial.print(", TPR: ");
-    Serial.println(expectedRightPulses);
-    Serial.print(", CPL: ");
-    Serial.print(pulse_reel_gauche);
-    Serial.print(", CPR: ");
-    Serial.println(pulse_reel_droite);
-    Serial.println(distance_little);
-    Serial.println(distance_big);
+    // Serial.print("TPL: ");
+    // Serial.print(expectedLeftPulses);
+    // Serial.print(", TPR: ");
+    // Serial.println(expectedRightPulses);
+    // Serial.print(", CPL: ");
+    // Serial.print(pulse_reel_gauche);
+    // Serial.print(", CPR: ");
+    // Serial.println(pulse_reel_droite);
+    // Serial.println(distance_little);
+    // Serial.println(distance_big);
   }
  
   stop();

@@ -5,6 +5,8 @@
 #include <LibRobus.h>
 #include <math.h>
 
+#include "robotMovement.hpp"
+
 #define YES 1
 #define NO 0
 #define GREEN 28
@@ -17,5 +19,6 @@ bool cupGreen(void);
 void DetectionInit(void);
 bool cupYellow(void);
 void followWall();
+void correctAngle(int, int, turnDirection);
 int distanceTOF_mm();
 #endif
