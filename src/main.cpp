@@ -29,6 +29,7 @@ void loop() {
   }
   if (active) {
     start_color = Floor_Color();
+    move(0.3, 5, false, false) //pour détecter la couleur puis avancer au tape
     //CASE 1
     smoothTurn(0.3, start_color);
     //CASE 2
