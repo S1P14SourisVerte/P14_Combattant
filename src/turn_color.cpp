@@ -79,7 +79,7 @@ void Detect_Line2(char Start_Color)
  
   while ((ENCODER_Read(LEFT) < 8900)){
  
-    if ((distanceTOF_mm() > 150) && (distanceTOF_mm() < 200) && (Cup_Drop == false))
+    if (((analogRead(A6) > 480) && (analogRead(A6) < 550)) && (Cup_Drop == false))
     {
       MOTOR_SetSpeed(LEFT, 0);
       MOTOR_SetSpeed(RIGHT, 0);
@@ -136,7 +136,7 @@ void Detect_Line2(char Start_Color)
  
 while ((ENCODER_Read(LEFT) < 11525)){
  
-    if ((distanceTOF_mm() > 150) && (distanceTOF_mm() < 200) && (Cup_Drop == false))
+    if(((analogRead(A6) > 480) && (analogRead(A6) < 550)) && (Cup_Drop == false))
     {
       MOTOR_SetSpeed(LEFT, 0);
       MOTOR_SetSpeed(RIGHT, 0);
@@ -206,9 +206,10 @@ servoInit();
 pinMode(A1, INPUT);
 pinMode(A2, INPUT);
 pinMode(A3, INPUT);
+pinMode(A6, INPUT);
 }
  
 void loop() {
- Detect_Line2('J');
+Serial.println(analogRead(A6));
  
 }

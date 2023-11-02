@@ -54,18 +54,118 @@ int distanceTOF_mm(){
   unsigned int distanceTOF_mm = 0;
 
  
-  int current_time = millis();
+ // int current_time = millis();
 
-  if(current_time - last_time >= 1000){
+ // if(current_time - last_time >= 1000){
     avalogValue = analogRead(RIGHT_SENSOR);
     distanceTOF_mm = (float) correctionFactor * pow((float) avalogValue, exponent_Factor);
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
     cmptData ++;
 
-    last_time = current_time;
+ //   last_time = current_time;
     
     return distanceTOF_mm;
-  }
+  //}
 }
 
 void DetectionInit(void) {
