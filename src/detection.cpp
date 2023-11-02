@@ -23,9 +23,10 @@ bool cupGreen() {
 }
 
 bool cupYellow() {
-    float distance = distanceTOF_mm();
+    float distance = analogRead(A7);
+    Serial.println(" distance: ");
     Serial.println(distance);
-    return((distance < CUP_DISTANCE) ? true : false);
+    return((distance > 400) ? true : false);
 }
 
 void followWall() {

@@ -24,15 +24,22 @@ char Floor_Color() {
  
   uint16_t red, green, blue, c;
   //Pour les données de couleur
+  delay(300);
   colorSensor.getRawData(&red, &green, &blue, &c);    // Valeur RGB
   delay(300);
+  Serial.print("ROUGE  ");
+  Serial.println(red);
+  Serial.print("VERT  ");
+  Serial.println(green);
+  Serial.print("BLEU  ");
+  Serial.println(blue);
  
 // VERT
   if (((red > 26) && (red < 40)) && ((green > 42) && (green < 58)) && ((blue > 34) && (blue < 50))){
   return 'V';
   }
 // JAUNE
-  else if (((red > 108) && (red < 120)) && ((green > 98) && (green < 110)) && ((blue > 54) && (blue < 66))){
+  else if (((red > 100) && (red < 120)) && ((green > 96) && (green < 110)) && ((blue > 54) && (blue < 66))){
   return 'J';
   }
 // ROUGE
@@ -40,16 +47,18 @@ char Floor_Color() {
   return 'R';
   }
 // BLANC
-  else if (((red > 118) && (red < 136)) && ((green > 118) && (green < 136)) && ((blue > 98) && (blue < 120))){
+  else if (((red > 106) && (red < 136)) && ((green > 106) && (green < 136)) && ((blue > 88) && (blue < 120))){
   return 'W';
   }
 // BLEU
  else if (((red > 24) && (red < 39)) && ((green > 34) && (green < 49)) && ((blue > 42) && (blue < 60))){
   return 'B';
   }
- 
+  else{
+    
+    return 'E';
+  }
   colorSensor.clearInterrupt();
-  return 'E';
 }
  
  
@@ -79,11 +88,10 @@ void Detect_Line2(char Start_Color)
  
   while ((ENCODER_Read(LEFT) < 8900)){
  
-    if ((distanceTOF_mm() > 150) && (distanceTOF_mm() < 200) && (Cup_Drop == false))
+    if ((analogRead(A6) > 490) && (analogRead(A6) < 550) && (Cup_Drop == false))
     {
       MOTOR_SetSpeed(LEFT, 0);
       MOTOR_SetSpeed(RIGHT, 0);
-      move(0.25,5);
       dropCup();
       Cup_Drop = true;
     }
@@ -117,7 +125,7 @@ void Detect_Line2(char Start_Color)
  
     else
     {
-      Serial.print("TOUT DROIT");
+      //Serial.print("TOUT DROIT");
       MOTOR_SetSpeed(LEFT, 0.30);
       MOTOR_SetSpeed(RIGHT, 0.30);
     }
@@ -136,16 +144,15 @@ void Detect_Line2(char Start_Color)
  
 while ((ENCODER_Read(LEFT) < 11525)){
  
-    if ((distanceTOF_mm() > 150) && (distanceTOF_mm() < 200) && (Cup_Drop == false))
+    if ((analogRead(A6) > 480) && (analogRead(A6) < 550) && (Cup_Drop == false))
     {
       MOTOR_SetSpeed(LEFT, 0);
       MOTOR_SetSpeed(RIGHT, 0);
-      move(0.25,5);
       dropCup();
       Cup_Drop = true;
-    }
-    else if (Cup_Drop == true) {
-      move(0.25, 86);
+    // }
+    // else if (Cup_Drop == true) {
+    //   move(0.25, 86);
     }
     else{
        if (analogRead(A1) < REF)
@@ -185,8 +192,8 @@ while ((ENCODER_Read(LEFT) < 11525)){
  
   MOTOR_SetSpeed(LEFT, 0);
   MOTOR_SetSpeed(RIGHT, 0);
- 
-  sharpTurn(RightTurn, 0.25, 45);
+  
+  sharpTurn(RightTurn, 0.25, 35);
  
   ENCODER_Reset(LEFT);
   ENCODER_Reset(RIGHT);
@@ -203,4 +210,5 @@ servoInit();
 pinMode(A1, INPUT);
 pinMode(A2, INPUT);
 pinMode(A3, INPUT);
+pinMode(A6, INPUT);
 }

@@ -105,5 +105,5 @@ void pid(float leftMotorSpeed, float rightMotorSpeed, int32_t expectedLeftMotorP
   
   // Le delais non bloquant fait passer le delta pulses de 10 a environ 100-120
   // donc jutilise la fonction delay()
-  delay(100);
+  delay(5);
 }

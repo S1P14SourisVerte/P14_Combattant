@@ -10,7 +10,7 @@
 #define GREEN 28
 #define RED 26
 #define RIGHT_SENSOR A7
-#define CUP_DISTANCE 250.0
+#define CUP_DISTANCE 150.0
 #define TARGET_DISTANCE 340.0
 // -> 0.86 V
 
