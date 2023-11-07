@@ -1,7 +1,5 @@
 #include "robotMovement.hpp"
 #include "pid.hpp"
-#include "robotServo.hpp"
-#include "detection.hpp"
 
 int flagZone45 = 0;
 
@@ -122,20 +120,6 @@ void nonStopMove(float motorSpeed, int distance_cm, bool hasAcceleration, bool h
 
     currentLeftPulses = (float)ENCODER_Read(LEFT_MOTOR);
     currentRightPulses = (float)ENCODER_Read(RIGHT_MOTOR);
-
-    if(flagZone45) {
-      if(cupYellow() /*&& i<2*/) {
-        sharpTurn(LeftTurn);
-        sweepCup();
-        sharpTurn(RightTurn);
-        resetEncoders();
-      } else if (cupGreen()) {
-        sharpTurn(RightTurn);
-        sweepCup();
-        sharpTurn(LeftTurn);
-        resetEncoders();
-      }
-    }
     
     pid(motorAccelerationSpeed, motorAccelerationSpeed, expectedLeftPulses, expectedRightPulses);
   }
@@ -153,19 +137,7 @@ void move2(float motorSpeed, int distance_cm)
 
   while ((float)ENCODER_Read(LEFT_MOTOR) <= PULSES_PER_WHEEL_CYCLE * distance_wheelCycles)
   {
-    if(flagZone45) {
-      if(cupYellow()) {
-        sharpTurn(LeftTurn);
-        sweepCup();
-        sharpTurn(RightTurn);
-        resetEncoders();
-      } else if (cupGreen()) {
-        sharpTurn(RightTurn);
-        sweepCup();
-        sharpTurn(LeftTurn);
-        resetEncoders();
-      }
-    }
+
     // correctDirection(motorSpeed, PULSES_PER_WHEEL_CYCLE * distance_wheelCycles);
   }
   // stop();
@@ -259,7 +231,9 @@ void resetEncoders()
   ENCODER_ReadReset(RIGHT_MOTOR);
 }
 
-void smoothTurn(float motorSpeed, char laneColor)
+
+// IL FAUT QU'IL FASSE UN 180 degré quand même serré => changer les données
+void smoothTurn(float motorSpeed)
 {
   float radius_little;
   float radius_big;
@@ -268,20 +242,16 @@ void smoothTurn(float motorSpeed, char laneColor)
   int expectedRightPulses;
   int expectedLeftPulses;
  
-  float turnMultiplier = laneColor == 'V' ? 1 : 2;
- 
   resetEncoders();
  
   radius_little =
-    (turnMultiplier * FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2);
+    (FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2);
   radius_big =
-    turnMultiplier * FOOT_TO_CENTIMETER + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
+    (FOOT_TO_CENTIMETER) + ((FOOT_TO_CENTIMETER - DISTANCE_BETWEEN_WHEELS_CM) / 2) + DISTANCE_BETWEEN_WHEELS_CM;
  
   distance_little = (2 * PI * (1.03 * radius_little) / 4.00);
-  if ('J') 
-    distance_big = (2 * PI * (1.03 * radius_big) / 4.00) - 2.15;
-  else if ('V')
-    distance_big = (2 * PI * (1.03 * radius_big) / 4.00) - 2;
+  distance_big = (2 * PI * (1.03 * radius_big) / 4.00) - 2;
+
   expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
   expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
  
@@ -303,17 +273,6 @@ void smoothTurn(float motorSpeed, char laneColor)
     pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
  
     pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
- 
-    Serial.print("TPL: ");
-    Serial.print(expectedLeftPulses);
-    Serial.print(", TPR: ");
-    Serial.println(expectedRightPulses);
-    Serial.print(", CPL: ");
-    Serial.print(pulse_reel_gauche);
-    Serial.print(", CPR: ");
-    Serial.println(pulse_reel_droite);
-    Serial.println(distance_little);
-    Serial.println(distance_big);
   }
  
   stop();

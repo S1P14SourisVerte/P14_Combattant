@@ -47,7 +47,7 @@ float getAcceleration(unsigned int startTime, bool isAcceleration = true);
 void stop();
 void robotMovementSetFlagZone(int value);
 void resetEncoders();
-void smoothTurn(float motorSpeed, char laneColor);
+void smoothTurn(float motorSpeed);
 void sharpTurn(turnDirection direction, float motorSpeed = 0.25, float angle = 90.0);
 void sharpTurn2(turnDirection direction, float motorSpeed = 0.25, float angle = 90.0);
 void correctTurnDirection(float motorSpeed, turnDirection direction);
