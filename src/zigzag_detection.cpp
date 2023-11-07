@@ -1,29 +1,28 @@
 #include <Arduino.h>
 #include <Librobus.h>
 
-// PUISQUE L'ON NE CONNAÎT PAS LA GROSSEUR DE LA DIMENSION DU TERRAIN DANS LEQUEL NOUS SERONS, on utilise un chiffre random
-#define BOX_DIMENSION 200
+#define FRONT_SENSOR1 A1
+#define FRONT_SENSOR2 0
 
-// PAS D'UTILISATION DE BOUCLE WHILE, car on veut que le robot puisse faire d'autre chose en avançant
 
-void zigzag(){
-
-// il faut que la fonction move() retourne la distance parcourue et qu'il ne reset pas les encodeurs 
-ENCODER_Reset(LEFT);
-ENCODER_Reset(RIGHT);
-
-  if (move() < (BOX_DIMENSION - 10)){
-    move();
-  }
-
-  else{
-    MOTOR_SetSpeed(0,0);
-    MOTOR_SetSpeed(0,0);
-
-  }
-
+// Code pour observer les obstacles en avant (test 1)
+bool FrontObject1() {
+  float distance = analogRead(FRONT_SENSOR1);
+  return((distance > 400) ? true : false);
 }
 
+// Code pour observer les obstacles en avant (test 2)
+bool FrontObject2() {
+  float value = ROBUS_ReadIR(FRONT_SENSOR2);
+  return((value > 400) ? true : false);
+}
+
+
+// Code pour faire la partie en zigzag
+void Zigzag_Movement(){
+  int i;
+
+}
 void setup(){
   BoardInit();
 }
