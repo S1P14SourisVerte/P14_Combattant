@@ -125,24 +125,6 @@ void nonStopMove(float motorSpeed, int distance_cm, bool hasAcceleration, bool h
   }
 }
 
-
-
-void move2(float motorSpeed, int distance_cm)
-{
-  resetEncoders();
-  MOTOR_SetSpeed(LEFT_MOTOR, motorSpeed * 0.979);
-  MOTOR_SetSpeed(RIGHT_MOTOR, motorSpeed);
-  // sigmoid logistic
-  float distance_wheelCycles = (float)distance_cm / WHEEL_CIRCONFERENCE_CM;
-
-  while ((float)ENCODER_Read(LEFT_MOTOR) <= PULSES_PER_WHEEL_CYCLE * distance_wheelCycles)
-  {
-
-    // correctDirection(motorSpeed, PULSES_PER_WHEEL_CYCLE * distance_wheelCycles);
-  }
-  // stop();
-}
-
 void correctDirection(float motorSpeed, float distance_pulses)
 {
   if (ENCODER_Read(LEFT_MOTOR) == 0 && ENCODER_Read(RIGHT_MOTOR) == 0)
@@ -255,12 +237,6 @@ void smoothTurn(float motorSpeed)
   expectedRightPulses = ((distance_little / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
   expectedLeftPulses = ((distance_big / WHEEL_CIRCONFERENCE_CM) * PULSES_PER_WHEEL_CYCLE);
  
-  int pulse_reel_gauche;
-  int pulse_reel_droite;
- 
-  pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
-  pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
- 
   float leftMotorSpeed = motorSpeed;
   float rightMotorSpeed = motorSpeed * (distance_little / distance_big);
  
@@ -269,12 +245,10 @@ void smoothTurn(float motorSpeed)
  
   while ((float)ENCODER_Read(RIGHT_MOTOR) < expectedRightPulses)
   {
-    pulse_reel_gauche = ENCODER_Read(LEFT_MOTOR);
-    pulse_reel_droite = ENCODER_Read(RIGHT_MOTOR);
  
     pid(leftMotorSpeed, rightMotorSpeed, expectedLeftPulses, expectedRightPulses);
   }
- 
+  
   stop();
 }
 
